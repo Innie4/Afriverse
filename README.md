@@ -6,7 +6,7 @@
 
 ```
 afriverse-labs/
-├── frontend/          # Next.js frontend application
+├── frontend/          # React (Vite) frontend application
 ├── backend/           # Express.js API + IPFS + blockchain utils
 └── contracts/         # Solidity smart contracts (Hardhat)
 ```
@@ -35,7 +35,7 @@ pnpm --filter contracts install
 ### Development
 
 ```bash
-# Start frontend (Next.js)
+# Start frontend (React + Vite)
 pnpm dev
 
 # Start backend (Express)
@@ -52,7 +52,7 @@ pnpm test
 
 This monorepo uses [pnpm workspaces](https://pnpm.io/workspaces) to manage multiple packages:
 
-- **frontend** - Next.js React application
+- **frontend** - React + Vite application
 - **backend** - Node.js Express API server
 - **contracts** - Solidity smart contracts with Hardhat
 
@@ -71,14 +71,16 @@ pnpm -r <command>
 ## 🏗️ Architecture
 
 ### Frontend (`frontend/`)
-- **Framework**: Next.js 16 with React 19
+- **Framework**: React 18 with Vite
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
 - **Animations**: Framer Motion, Lottie
+- **Web3**: Ethers.js, MetaMask integration
 - **Features**:
-  - Story gallery and browsing
-  - Story upload and minting
+  - Story gallery and browsing (connected to backend API)
+  - Story upload and minting (IPFS + blockchain)
   - Wallet integration (Web3)
+  - Error handling and loading states
   - Responsive design
 
 ### Backend (`backend/`)
@@ -137,7 +139,7 @@ pnpm --filter frontend test
 ## 🚢 Deployment
 
 ### Frontend
-Deploy to Vercel, Netlify, or any Next.js hosting platform.
+Deploy to Vercel, Netlify, or any static hosting platform (Vite builds to static files).
 
 ### Backend
 Deploy to Railway, Render, or any Node.js hosting platform.
