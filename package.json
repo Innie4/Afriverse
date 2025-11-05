@@ -1,0 +1,39 @@
+{
+  "name": "afriverse-labs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Afriverse Tales - Web3 storytelling platform monorepo",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "contracts"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend start",
+    "build": "pnpm --filter frontend build",
+    "build:contracts": "pnpm --filter contracts compile",
+    "start": "pnpm --filter frontend preview",
+    "lint": "pnpm --filter frontend lint",
+    "test": "pnpm --filter contracts test",
+    "test:backend": "pnpm --filter backend test",
+    "install:all": "pnpm install",
+    "deploy:contracts": "pnpm --filter contracts deploy:mumbai",
+    "verify:contracts": "pnpm --filter contracts verify:mumbai"
+  },
+  "keywords": [
+    "web3",
+    "nft",
+    "blockchain",
+    "ipfs",
+    "storytelling",
+    "africa"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
