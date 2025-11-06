@@ -103,7 +103,7 @@ export default function StoryDetail() {
   const rawAttributes = Array.isArray(metadata.attributes) ? metadata.attributes : []
   const tags = rawAttributes
     .map((attr: { value?: unknown }) => (typeof attr?.value === "string" ? attr.value : null))
-    .filter((tag): tag is string => Boolean(tag))
+    .filter((tag: string | null): tag is string => typeof tag === "string" && tag.trim().length > 0)
   const paragraphs = content
     .split(/\n{2,}/)
     .map((segment) => segment.trim())
@@ -238,7 +238,7 @@ export default function StoryDetail() {
             <div className="mb-12 pb-12 border-b border-border">
               <h3 className="font-semibold mb-4">Tags</h3>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag, index) => (
+                {tags.map((tag: string, index: number) => (
                   <Link
                     key={tag + index}
                     to={`/gallery?search=${tag}`}
