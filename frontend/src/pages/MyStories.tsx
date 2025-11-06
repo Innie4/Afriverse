@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { Plus, Loader2, Wallet } from "lucide-react"
+import { Plus, Wallet } from "lucide-react"
 import AuroraBackground from "@/components/aurora-background"
 import TribalPatternOverlay from "@/components/tribal-pattern-overlay"
 import StoryCard from "@/components/story-card"

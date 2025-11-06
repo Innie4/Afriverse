@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { Sparkles, Users, Zap, ArrowRight, Shield, Globe, BookOpen, Heart, Award } from "lucide-react"
+import { Sparkles, Users, ArrowRight, Shield, Globe, BookOpen, Heart, Award } from "lucide-react"
 import AuroraBackground from "@/components/aurora-background"
 import TribalPatternOverlay from "@/components/tribal-pattern-overlay"
 import ParallaxHero from "@/components/parallax-hero"
@@ -353,7 +353,7 @@ export default function Home() {
             viewport={{ once: true }}
             variants={containerVariants}
           >
-            {stories.map((story, idx) => (
+            {stories.map((story) => (
               <motion.div
                 key={story.id}
                 variants={itemVariants}

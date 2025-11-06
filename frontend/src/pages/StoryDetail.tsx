@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import StoryCard from "@/components/story-card"
-import { Heart, Share2, Bookmark, Eye, Calendar, User, Loader2 } from "lucide-react"
+import { Heart, Share2, Bookmark, Eye, Calendar, User } from "lucide-react"
 import Footer from "@/components/footer"
 import Navbar from "@/components/navbar"
 import { fetchStoryById, fetchStories, type Story } from "@/services/api"
@@ -99,8 +99,15 @@ export default function StoryDetail() {
   }
 
   const metadata = story.metadata || {}
-  const content = metadata.content || story.description || ""
-  const tags = metadata.attributes?.map((attr: any) => attr.value) || []
+  const content = (metadata.content as string | undefined) ?? story.description ?? ""
+  const rawAttributes = Array.isArray(metadata.attributes) ? metadata.attributes : []
+  const tags = rawAttributes
+    .map((attr: { value?: unknown }) => (typeof attr?.value === "string" ? attr.value : null))
+    .filter((tag): tag is string => Boolean(tag))
+  const paragraphs = content
+    .split(/\n{2,}/)
+    .map((segment) => segment.trim())
+    .filter(Boolean)
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -218,8 +225,8 @@ export default function StoryDetail() {
             </p>
 
             <div className="space-y-6 text-foreground leading-relaxed">
-              {content.split("\n\n").map((paragraph, idx) => (
-                <p key={idx} className="text-lg">
+              {paragraphs.map((paragraph, index) => (
+                <p key={index} className="text-lg">
                   {paragraph}
                 </p>
               ))}
@@ -231,9 +238,9 @@ export default function StoryDetail() {
             <div className="mb-12 pb-12 border-b border-border">
               <h3 className="font-semibold mb-4">Tags</h3>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag, idx) => (
+                {tags.map((tag, index) => (
                   <Link
-                    key={idx}
+                    key={tag + index}
                     to={`/gallery?search=${tag}`}
                     className="px-4 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
                   >

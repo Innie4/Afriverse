@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { Heart, Eye } from "lucide-react"
-import { useState } from "react"
+import { useState, type MouseEvent } from "react"
 
 interface Story {
   id: number
@@ -21,7 +21,7 @@ export default function StoryCard({ story }: StoryCardProps) {
   const [isLiked, setIsLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(story.likes)
 
-  const handleLike = (e: React.MouseEvent) => {
+  const handleLike = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setIsLiked(!isLiked)
