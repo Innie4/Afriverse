@@ -24,7 +24,9 @@ import { uploadFileToIPFS, uploadMetadataToIPFS } from "@/services/api"
 import { toast } from "sonner"
 import { AFRICAN_TRIBES } from "@/data/tribes"
 import { AFRICAN_LANGUAGES } from "@/data/languages"
+import { AFRICAN_GENRES } from "@/data/genres"
 import { SearchableSelect } from "@/components/searchable-select"
+import { SearchableMultiSelect } from "@/components/searchable-multi-select"
 import { marked } from "marked"
 import DOMPurify from "dompurify"
 
@@ -82,6 +84,7 @@ export default function StoryUploadForm() {
   const textAreaRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map())
   const undoStack = useRef<Record<string, string[]>>({})
   const redoStack = useRef<Record<string, string[]>>({})
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([])
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -100,6 +103,7 @@ export default function StoryUploadForm() {
         formData: StoryFormState
         chapters: Chapter[]
         imagePreview?: string
+        selectedGenres?: string[]
       }
       if (parsed.formData) {
         setFormData({ ...parsed.formData, image: undefined })
@@ -116,6 +120,11 @@ export default function StoryUploadForm() {
       if (parsed.imagePreview) {
         setImagePreview(parsed.imagePreview)
       }
+      const draftGenres = Array.isArray(parsed.selectedGenres) ? parsed.selectedGenres : []
+      if (draftGenres.length > 0) {
+        setSelectedGenres(draftGenres)
+        setFormData((previous) => ({ ...previous, tags: draftGenres.join(", ") }))
+      }
       toast.info("Draft restored from your previous session.")
     } catch (draftError) {
       console.warn("Unable to parse draft storage", draftError)
@@ -128,6 +137,7 @@ export default function StoryUploadForm() {
       formData: { ...formData, image: undefined },
       chapters,
       imagePreview,
+      selectedGenres,
     }
     window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload))
     toast.success("Draft saved locally.")
@@ -139,6 +149,7 @@ export default function StoryUploadForm() {
     }
     undoStack.current = {}
     redoStack.current = {}
+    setSelectedGenres([])
     if (!silent) {
       toast.success("Draft cleared.")
     }
@@ -380,13 +391,10 @@ export default function StoryUploadForm() {
           { trait_type: "Language", value: formData.language },
           { trait_type: "Author", value: formData.author },
           { trait_type: "Chapters", value: normalizedChapters.length.toString() },
-          ...(formData.tags ? [{ trait_type: "Tags", value: formData.tags }] : []),
+          ...(selectedGenres.length ? [{ trait_type: "Tags", value: selectedGenres.join(", ") }] : []),
         ],
         summary: combinedContent.slice(0, 500),
-        tags: formData.tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter(Boolean),
+        tags: selectedGenres,
         chapters: normalizedChapters,
         content: combinedContent,
       }
@@ -418,6 +426,7 @@ export default function StoryUploadForm() {
         })
         setChapters([createChapter(0)])
         setImagePreview(null)
+        setSelectedGenres([])
         clearDraft(true)
 
         setTimeout(() => {
@@ -719,6 +728,7 @@ export default function StoryUploadForm() {
                   })
                   setChapters([createChapter(0)])
                   setImagePreview(null)
+                  setSelectedGenres([])
                 }}
                 className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:border-destructive/50"
               >
@@ -831,17 +841,18 @@ export default function StoryUploadForm() {
         </div>
 
         <div>
-          <label htmlFor="tags" className="block text-sm font-semibold mb-2">
-            Tags
-          </label>
-          <input
-            type="text"
-            id="tags"
+          <label className="block text-sm font-semibold mb-2">Genre Tags</label>
+          <SearchableMultiSelect
             name="tags"
-            value={formData.tags}
-            onChange={handleInputChange}
-            placeholder="e.g., folklore, mythology, cultural — separated by commas"
-            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            values={selectedGenres}
+            onChange={(nextValues) => {
+              setSelectedGenres(nextValues)
+              setFormData((previous) => ({ ...previous, tags: nextValues.join(", ") }))
+              setError("")
+            }}
+            options={AFRICAN_GENRES}
+            placeholder="Select relevant genres"
+            helperText="Choose one or multiple genres to help readers discover your story."
           />
         </div>
 
