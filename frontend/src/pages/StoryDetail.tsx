@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import StoryCard from "@/components/story-card"
 import { Heart, Share2, Bookmark, Eye, Calendar, User } from "lucide-react"
@@ -7,6 +7,10 @@ import Navbar from "@/components/navbar"
 import { fetchStoryById, fetchStories, type Story } from "@/services/api"
 import { StoryDetailSkeleton } from "@/components/skeleton"
 import { toast } from "sonner"
+import DOMPurify from "dompurify"
+import { marked } from "marked"
+
+const stripHtmlText = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 
 export default function StoryDetail() {
   const { id } = useParams<{ id: string }>()
@@ -99,15 +103,17 @@ export default function StoryDetail() {
   }
 
   const metadata = story.metadata || {}
-  const content = (metadata.content as string | undefined) ?? story.description ?? ""
-  const rawAttributes = Array.isArray(metadata.attributes) ? metadata.attributes : []
-  const tags = rawAttributes
-    .map((attr: { value?: unknown }) => (typeof attr?.value === "string" ? attr.value : null))
-    .filter((tag: string | null): tag is string => typeof tag === "string" && tag.trim().length > 0)
-  const paragraphs = content
-    .split(/\n{2,}/)
-    .map((segment) => segment.trim())
-    .filter(Boolean)
+  const gateway = import.meta.env.VITE_IPFS_GATEWAY || "https://ipfs.io/ipfs/"
+  const rawImage = metadata.image || story.ipfsUrl
+  const coverImage = typeof rawImage === "string" && rawImage.startsWith("ipfs://") ? rawImage.replace("ipfs://", gateway) : rawImage || "/placeholder.svg"
+  const chapters = useMemo(() => (Array.isArray(metadata.chapters) ? metadata.chapters : []), [metadata.chapters])
+  const summary = metadata.summary || story.description || "A story from Afriverse Tales"
+  const attributeArray = Array.isArray(metadata.attributes) ? metadata.attributes : []
+  const attributeTags = attributeArray
+    .filter((attr: any) => typeof attr?.value === "string" && (attr.trait_type === "Tags" || attr.trait_type === "Tag"))
+    .flatMap((attr: any) => (attr.value as string).split(/[,;]+/).map((tag) => tag.trim()))
+  const metadataTags = Array.isArray(metadata.tags) ? metadata.tags : []
+  const tags = Array.from(new Set([...metadataTags, ...attributeTags].filter(Boolean)))
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -116,7 +122,7 @@ export default function StoryDetail() {
       {/* Hero Image */}
       <div className="relative w-full h-96 sm:h-[500px] bg-muted">
         <img 
-          src={metadata.image || story.ipfsUrl || "/placeholder.svg"} 
+          src={coverImage} 
           alt={story.title || "Story"} 
           className="w-full h-full object-cover" 
         />
@@ -220,17 +226,43 @@ export default function StoryDetail() {
 
           {/* Story Content */}
           <div className="prose prose-invert max-w-none mb-12">
-            <p className="text-lg text-muted-foreground mb-8 italic">
-              {story.description || "A story from Afriverse Tales"}
-            </p>
+            <p className="text-lg text-muted-foreground mb-8 italic">{summary}</p>
 
-            <div className="space-y-6 text-foreground leading-relaxed">
-              {paragraphs.map((paragraph, index) => (
-                <p key={index} className="text-lg">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            {chapters.length > 0 ? (
+              <div className="space-y-10">
+                {chapters.map((chapter: any, index: number) => {
+                  const markdownSource = chapter?.contentMarkdown || ""
+                  const generatedHtml = chapter?.contentHtml || (marked.parse(markdownSource) as string) || ""
+                  const safeHtml = DOMPurify.sanitize(generatedHtml)
+                  const plainText = chapter?.contentText || stripHtmlText(safeHtml)
+                  return (
+                    <article key={chapter?.id ?? index} className="space-y-3">
+                      <h2 className="text-2xl font-semibold text-foreground">
+                        {chapter?.title || `Chapter ${index + 1}`}
+                      </h2>
+                      <div
+                        className="prose prose-invert max-w-none text-foreground"
+                        dangerouslySetInnerHTML={{ __html: safeHtml }}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {plainText.length} characters • Chapter {index + 1} of {chapters.length}
+                      </p>
+                    </article>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="space-y-6 text-foreground leading-relaxed">
+                {(metadata.content as string | undefined)?.split(/\n{2,}/)
+                  .map((segment) => segment.trim())
+                  .filter(Boolean)
+                  .map((paragraph, index) => (
+                    <p key={index} className="text-lg">
+                      {paragraph}
+                    </p>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* Tags */}

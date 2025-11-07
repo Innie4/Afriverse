@@ -125,24 +125,20 @@ export default function Home() {
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+            className="mb-16 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-6"
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to="/upload"
-                className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-              >
-                Start Minting <ArrowRight size={20} />
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to="/gallery"
-                className="px-8 py-4 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 transition-all border border-border"
-              >
-                Explore Gallery
-              </Link>
-            </motion.div>
+            <Link
+              to="/upload"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 font-semibold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-xl"
+            >
+              Start Minting <ArrowRight size={20} />
+            </Link>
+            <Link
+              to="/gallery"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-muted px-8 py-4 font-semibold text-foreground transition-all hover:scale-[1.02] hover:bg-muted/80"
+            >
+              Explore Gallery
+            </Link>
           </motion.div>
 
           {/* Parallax Hero Image */}

@@ -1,9 +1,12 @@
 import AuroraBackground from "@/components/aurora-background"
 import TribalPatternOverlay from "@/components/tribal-pattern-overlay"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
 
 export default function About() {
   return (
     <div className="min-h-screen bg-background flex flex-col relative">
+      <Navbar />
       <AuroraBackground />
 
       <section className="flex-1 px-4 sm:px-6 lg:px-8 py-20 relative">
@@ -39,6 +42,7 @@ export default function About() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }

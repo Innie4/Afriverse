@@ -1,21 +1,48 @@
-import { useState } from "react"
-import { Upload, Loader2, Wallet, ExternalLink, CheckCircle2 } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  Upload,
+  Loader2,
+  Wallet,
+  ExternalLink,
+  CheckCircle2,
+  Plus,
+  Trash2,
+  Bold,
+  Italic,
+  Underline,
+  List,
+  Quote,
+  Save,
+  Undo,
+  Redo,
+  BookOpen,
+} from "lucide-react"
 import { SuccessAnimation, TransactionAnimation } from "@/components/lottie-animations"
 import { useWeb3 } from "@/hooks/useWeb3"
 import { motion, AnimatePresence } from "framer-motion"
 import { uploadFileToIPFS, uploadMetadataToIPFS } from "@/services/api"
 import { toast } from "sonner"
+import { AFRICAN_TRIBES } from "@/data/tribes"
+import { AFRICAN_LANGUAGES } from "@/data/languages"
+import { SearchableSelect } from "@/components/searchable-select"
+import { marked } from "marked"
+import DOMPurify from "dompurify"
 
-interface FormData {
+interface StoryFormState {
   title: string
   author: string
   category: string
   description: string
-  content: string
   image?: File
   tags: string
   tribe: string
   language: string
+}
+
+interface Chapter {
+  id: string
+  title: string
+  content: string
 }
 
 const categories = [
@@ -29,56 +56,32 @@ const categories = [
   "Poetry",
 ]
 
-// Upload story to IPFS via backend
-async function uploadToIPFS(formData: FormData): Promise<string> {
-  try {
-    // Step 1: Upload image if provided
-    let imageHash = ""
-    if (formData.image) {
-      const imageResult = await uploadFileToIPFS(formData.image)
-      imageHash = imageResult.cid
-      toast.success("Image uploaded to IPFS")
-    }
+const DRAFT_STORAGE_KEY = "afriverse-tales-story-draft"
 
-    // Step 2: Create metadata JSON
-    const metadata = {
-      name: formData.title,
-      description: formData.description,
-      image: imageHash ? `ipfs://${imageHash}` : "",
-      attributes: [
-        { trait_type: "Category", value: formData.category },
-        { trait_type: "Tribe", value: formData.tribe },
-        { trait_type: "Language", value: formData.language },
-        { trait_type: "Author", value: formData.author },
-        ...(formData.tags ? [{ trait_type: "Tags", value: formData.tags }] : []),
-      ],
-      content: formData.content,
-    }
+const createChapter = (index: number): Chapter => ({
+  id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `chapter-${Date.now()}-${index}`,
+  title: `Chapter ${index + 1}`,
+  content: "",
+})
 
-    // Step 3: Upload metadata to IPFS
-    const metadataResult = await uploadMetadataToIPFS(metadata)
-    toast.success("Metadata uploaded to IPFS")
-    
-    return metadataResult.cid
-  } catch (error: any) {
-    toast.error(error.message || "Failed to upload to IPFS")
-    throw error
-  }
-}
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 
 export default function StoryUploadForm() {
   const { isConnected, account, connectWallet, mintStory, error: web3Error, checkMetaMask } = useWeb3()
-  
-  const [formData, setFormData] = useState<FormData>({
+
+  const [formData, setFormData] = useState<StoryFormState>({
     title: "",
     author: "",
     category: "",
     description: "",
-    content: "",
     tags: "",
     tribe: "",
     language: "",
   })
+  const [chapters, setChapters] = useState<Chapter[]>([createChapter(0)])
+  const textAreaRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map())
+  const undoStack = useRef<Record<string, string[]>>({})
+  const redoStack = useRef<Record<string, string[]>>({})
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -88,28 +91,202 @@ export default function StoryUploadForm() {
   const [tokenId, setTokenId] = useState<string | null>(null)
   const [step, setStep] = useState<"form" | "uploading" | "minting" | "success">("form")
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const storedDraft = window.localStorage.getItem(DRAFT_STORAGE_KEY)
+    if (!storedDraft) return
+    try {
+      const parsed = JSON.parse(storedDraft) as {
+        formData: StoryFormState
+        chapters: Chapter[]
+        imagePreview?: string
+      }
+      if (parsed.formData) {
+        setFormData({ ...parsed.formData, image: undefined })
+      }
+      if (Array.isArray(parsed.chapters) && parsed.chapters.length > 0) {
+        setChapters(
+          parsed.chapters.map((chapter, index) => ({
+            id: chapter.id ?? createChapter(index).id,
+            title: chapter.title ?? `Chapter ${index + 1}`,
+            content: chapter.content ?? "",
+          }))
+        )
+      }
+      if (parsed.imagePreview) {
+        setImagePreview(parsed.imagePreview)
+      }
+      toast.info("Draft restored from your previous session.")
+    } catch (draftError) {
+      console.warn("Unable to parse draft storage", draftError)
+    }
+  }, [])
+
+  const persistDraft = () => {
+    if (typeof window === "undefined") return
+    const payload = {
+      formData: { ...formData, image: undefined },
+      chapters,
+      imagePreview,
+    }
+    window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload))
+    toast.success("Draft saved locally.")
+  }
+
+  const clearDraft = (silent = false) => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(DRAFT_STORAGE_KEY)
+    }
+    undoStack.current = {}
+    redoStack.current = {}
+    if (!silent) {
+      toast.success("Draft cleared.")
+    }
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = event.target
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
     }))
     setError("")
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        image: file,
-      }))
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setFormData((previous) => ({
+      ...previous,
+      image: file,
+    }))
+    const reader = new FileReader()
+    reader.onloadend = () => setImagePreview(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const setTextAreaRef = (id: string) => (node: HTMLTextAreaElement | null) => {
+    if (!node) {
+      textAreaRefs.current.delete(id)
+      return
     }
+    textAreaRefs.current.set(id, node)
+  }
+
+  const updateChapterContent = (id: string, updater: (content: string) => string) => {
+    setChapters((previous) =>
+      previous.map((chapter) => {
+        if (chapter.id !== id) return chapter
+        const priorContent = chapter.content
+        const nextContent = updater(priorContent)
+        if (!undoStack.current[id]) undoStack.current[id] = []
+        undoStack.current[id].push(priorContent)
+        redoStack.current[id] = []
+        return { ...chapter, content: nextContent }
+      })
+    )
+  }
+
+  const handleChapterTitleChange = (id: string, value: string) => {
+    setChapters((previous) => previous.map((chapter) => (chapter.id === id ? { ...chapter, title: value } : chapter)))
+    setError("")
+  }
+
+  const handleChapterContentChange = (id: string, value: string) => {
+    updateChapterContent(id, () => value)
+    setError("")
+  }
+
+  const applyWrapFormatting = (id: string, prefix: string, suffix = prefix) => {
+    const textarea = textAreaRefs.current.get(id)
+    if (!textarea) return
+    const { selectionStart, selectionEnd, value } = textarea
+    const selectedText = value.substring(selectionStart, selectionEnd)
+    const nextValue = `${value.substring(0, selectionStart)}${prefix}${selectedText}${suffix}${value.substring(selectionEnd)}`
+    updateChapterContent(id, () => nextValue)
+    requestAnimationFrame(() => {
+      const cursor = selectionStart + prefix.length + selectedText.length + suffix.length
+      textarea.focus()
+      textarea.setSelectionRange(cursor, cursor)
+    })
+  }
+
+  const applyLineFormatting = (id: string, marker: string) => {
+    const textarea = textAreaRefs.current.get(id)
+    if (!textarea) return
+    const { selectionStart, selectionEnd, value } = textarea
+    const selectedValue = value.substring(selectionStart, selectionEnd) || value
+    const formatted = selectedValue
+      .split(/\n/)
+      .map((line) => {
+        const trimmed = line.trim()
+        if (!trimmed) return marker
+        if (trimmed.startsWith(marker.trim())) return line
+        return `${marker}${trimmed}`
+      })
+      .join("\n")
+    const nextValue = selectionStart === 0 && selectionEnd === value.length ? formatted : `${value.substring(0, selectionStart)}${formatted}${value.substring(selectionEnd)}`
+    updateChapterContent(id, () => nextValue)
+    requestAnimationFrame(() => {
+      const cursor = selectionStart + formatted.length
+      textarea.focus()
+      textarea.setSelectionRange(cursor, cursor)
+    })
+  }
+
+  const handleUndo = (id: string) => {
+    const history = undoStack.current[id]
+    if (!history || history.length === 0) return
+    const textarea = textAreaRefs.current.get(id)
+    setChapters((previous) =>
+      previous.map((chapter) => {
+        if (chapter.id !== id) return chapter
+        const previousContent = history.pop() as string
+        if (!redoStack.current[id]) redoStack.current[id] = []
+        redoStack.current[id].push(chapter.content)
+        return { ...chapter, content: previousContent }
+      })
+    )
+    requestAnimationFrame(() => textarea?.focus())
+  }
+
+  const handleRedo = (id: string) => {
+    const history = redoStack.current[id]
+    if (!history || history.length === 0) return
+    const textarea = textAreaRefs.current.get(id)
+    setChapters((previous) =>
+      previous.map((chapter) => {
+        if (chapter.id !== id) return chapter
+        const nextContent = history.pop() as string
+        if (!undoStack.current[id]) undoStack.current[id] = []
+        undoStack.current[id].push(chapter.content)
+        return { ...chapter, content: nextContent }
+      })
+    )
+    requestAnimationFrame(() => textarea?.focus())
+  }
+
+  const handleAddChapter = () => {
+    setChapters((previous) => {
+      const nextChapter = createChapter(previous.length)
+      undoStack.current[nextChapter.id] = []
+      redoStack.current[nextChapter.id] = []
+      setTimeout(() => {
+        textAreaRefs.current.get(nextChapter.id)?.focus()
+      }, 200)
+      return [...previous, nextChapter]
+    })
+  }
+
+  const handleRemoveChapter = (id: string) => {
+    if (chapters.length === 1) {
+      toast.error("Your story needs at least one chapter.")
+      return
+    }
+    setChapters((previous) => previous.filter((chapter) => chapter.id !== id))
+    textAreaRefs.current.delete(id)
+    delete undoStack.current[id]
+    delete redoStack.current[id]
   }
 
   const validateForm = () => {
@@ -129,8 +306,9 @@ export default function StoryUploadForm() {
       setError("Description is required")
       return false
     }
-    if (!formData.content.trim()) {
-      setError("Story content is required")
+    const hasContent = chapters.some((chapter) => chapter.content.trim().length > 0)
+    if (!hasContent) {
+      setError("Please add content to at least one chapter")
       return false
     }
     if (!formData.tribe.trim()) {
@@ -148,8 +326,8 @@ export default function StoryUploadForm() {
     return true
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     if (!validateForm()) return
 
     setIsLoading(true)
@@ -157,14 +335,69 @@ export default function StoryUploadForm() {
     setStep("uploading")
 
     try {
-      // Step 1: Upload to IPFS
-      const ipfsHash = await uploadToIPFS(formData)
-      
+      const normalizedChapters = chapters
+        .map((chapter, index) => {
+          const markdown = chapter.content.trim()
+          if (!markdown) return null
+          const title = chapter.title.trim() || `Chapter ${index + 1}`
+      const html = DOMPurify.sanitize((marked.parse(markdown) as string) ?? "")
+          const text = stripHtml(html)
+          return {
+            order: index + 1,
+            id: chapter.id,
+            title,
+            contentMarkdown: markdown,
+            contentHtml: html,
+            contentText: text,
+          }
+        })
+        .filter(Boolean)
+
+      if (!normalizedChapters.length) {
+        throw new Error("Chapter content missing. Please add text to your story.")
+      }
+
+      let imageHash = ""
+      if (formData.image) {
+        const imageResult = await uploadFileToIPFS(formData.image)
+        imageHash = imageResult.cid
+        toast.success("Image uploaded to IPFS")
+      }
+
+      const combinedContent = normalizedChapters
+        .map((chapter) => `${chapter!.title}\n\n${chapter!.contentText}`)
+        .join("\n\n")
+
+      const metadata = {
+        name: formData.title,
+        description: formData.description,
+        image: imageHash ? `ipfs://${imageHash}` : "",
+        version: "1.1.0",
+        format: "markdown",
+        attributes: [
+          { trait_type: "Category", value: formData.category },
+          { trait_type: "Tribe", value: formData.tribe },
+          { trait_type: "Language", value: formData.language },
+          { trait_type: "Author", value: formData.author },
+          { trait_type: "Chapters", value: normalizedChapters.length.toString() },
+          ...(formData.tags ? [{ trait_type: "Tags", value: formData.tags }] : []),
+        ],
+        summary: combinedContent.slice(0, 500),
+        tags: formData.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+        chapters: normalizedChapters,
+        content: combinedContent,
+      }
+
+      const metadataResult = await uploadMetadataToIPFS(metadata)
+      toast.success("Metadata uploaded to IPFS")
+
       setStep("minting")
       setShowTransaction(true)
 
-      // Step 2: Mint NFT on blockchain
-      const result = await mintStory(ipfsHash, formData.tribe, formData.language)
+      const result = await mintStory(metadataResult.cid, formData.tribe, formData.language)
 
       if (result.success && result.txHash) {
         setTxHash(result.txHash)
@@ -173,35 +406,35 @@ export default function StoryUploadForm() {
         setShowTransaction(false)
         setSuccess(true)
         toast.success("Story minted successfully!")
-        
-        // Reset form
+
         setFormData({
           title: "",
           author: "",
           category: "",
           description: "",
-          content: "",
           tags: "",
           tribe: "",
           language: "",
         })
+        setChapters([createChapter(0)])
         setImagePreview(null)
-        
+        clearDraft(true)
+
         setTimeout(() => {
           setSuccess(false)
           setStep("form")
         }, 5000)
       } else {
-        const errorMsg = result.error || "Failed to mint story"
-        setError(errorMsg)
-        toast.error(errorMsg)
+        const errorMessage = result.error || "Failed to mint story"
+        setError(errorMessage)
+        toast.error(errorMessage)
         setStep("form")
         setShowTransaction(false)
       }
-    } catch (err: any) {
-      const errorMsg = err.message || "Failed to upload story. Please try again."
-      setError(errorMsg)
-      toast.error(errorMsg)
+    } catch (submissionError: any) {
+      const message = submissionError.message || "Failed to upload story. Please try again."
+      setError(message)
+      toast.error(message)
       setStep("form")
       setShowTransaction(false)
     } finally {
@@ -209,14 +442,13 @@ export default function StoryUploadForm() {
     }
   }
 
-  const getPolygonScanUrl = (hash: string) => {
-    return `https://mumbai.polygonscan.com/tx/${hash}`
-  }
+  const getPolygonScanUrl = (hash: string) => `https://mumbai.polygonscan.com/tx/${hash}`
+
+  const chapterCount = useMemo(() => chapters.length, [chapters])
 
   return (
     <div className="relative">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Wallet Connection Banner */}
         {!isConnected && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -242,7 +474,6 @@ export default function StoryUploadForm() {
           </motion.div>
         )}
 
-        {/* Connected Wallet Info */}
         {isConnected && account && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -262,7 +493,6 @@ export default function StoryUploadForm() {
           </motion.div>
         )}
 
-        {/* Transaction Confirmation Animation */}
         <AnimatePresence>
           {showTransaction && (
             <motion.div
@@ -290,7 +520,6 @@ export default function StoryUploadForm() {
           )}
         </AnimatePresence>
 
-        {/* Success Message */}
         <AnimatePresence>
           {success && (
             <motion.div
@@ -329,7 +558,6 @@ export default function StoryUploadForm() {
           )}
         </AnimatePresence>
 
-        {/* Error Message */}
         <AnimatePresence>
           {(error || web3Error) && (
             <motion.div
@@ -344,23 +572,13 @@ export default function StoryUploadForm() {
           )}
         </AnimatePresence>
 
-        {/* Image Upload */}
         <div>
           <label className="block text-sm font-semibold mb-2">Story Cover Image</label>
           <div className="relative border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-muted/30">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
+            <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
             {imagePreview ? (
               <div className="space-y-3">
-                <img
-                  src={imagePreview || "/placeholder.svg"}
-                  alt="Preview"
-                  className="w-32 h-32 object-cover rounded-lg mx-auto"
-                />
+                <img src={imagePreview || "/placeholder.svg"} alt="Preview" className="w-32 h-32 object-cover rounded-lg mx-auto" />
                 <p className="text-sm text-muted-foreground">Click to change image</p>
               </div>
             ) : (
@@ -373,7 +591,6 @@ export default function StoryUploadForm() {
           </div>
         </div>
 
-        {/* Title */}
         <div>
           <label htmlFor="title" className="block text-sm font-semibold mb-2">
             Story Title *
@@ -389,7 +606,6 @@ export default function StoryUploadForm() {
           />
         </div>
 
-        {/* Author */}
         <div>
           <label htmlFor="author" className="block text-sm font-semibold mb-2">
             Author Name *
@@ -405,39 +621,36 @@ export default function StoryUploadForm() {
           />
         </div>
 
-        {/* Tribe */}
         <div>
-          <label htmlFor="tribe" className="block text-sm font-semibold mb-2">
-            Tribe/Cultural Group *
-          </label>
-          <input
-            type="text"
-            id="tribe"
+          <label className="block text-sm font-semibold mb-2">Tribe/Cultural Group *</label>
+          <SearchableSelect
             name="tribe"
             value={formData.tribe}
-            onChange={handleInputChange}
-            placeholder="e.g., Yoruba, Zulu, Akan, etc."
-            className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            onChange={(nextValue) => {
+              setFormData((previous) => ({ ...previous, tribe: nextValue }))
+              setError("")
+            }}
+            options={AFRICAN_TRIBES}
+            placeholder="Search and select a tribe or cultural group"
+            helperText="We curated a wide list across Africa. Start typing to search."
           />
         </div>
 
-        {/* Language */}
         <div>
-          <label htmlFor="language" className="block text-sm font-semibold mb-2">
-            Language *
-          </label>
-          <input
-            type="text"
-            id="language"
+          <label className="block text-sm font-semibold mb-2">Language *</label>
+          <SearchableSelect
             name="language"
             value={formData.language}
-            onChange={handleInputChange}
-            placeholder="e.g., English, Swahili, Yoruba, etc."
-            className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            onChange={(nextValue) => {
+              setFormData((previous) => ({ ...previous, language: nextValue }))
+              setError("")
+            }}
+            options={AFRICAN_LANGUAGES}
+            placeholder="Search languages spoken across Africa"
+            helperText="Select the primary language of this story."
           />
         </div>
 
-        {/* Category */}
         <div>
           <label htmlFor="category" className="block text-sm font-semibold mb-2">
             Category *
@@ -458,7 +671,6 @@ export default function StoryUploadForm() {
           </select>
         </div>
 
-        {/* Description */}
         <div>
           <label htmlFor="description" className="block text-sm font-semibold mb-2">
             Short Description *
@@ -476,24 +688,148 @@ export default function StoryUploadForm() {
           <p className="text-xs text-muted-foreground mt-1">{formData.description.length}/200</p>
         </div>
 
-        {/* Content */}
-        <div>
-          <label htmlFor="content" className="block text-sm font-semibold mb-2">
-            Story Content *
-          </label>
-          <textarea
-            id="content"
-            name="content"
-            value={formData.content}
-            onChange={handleInputChange}
-            placeholder="Write your complete story here..."
-            rows={10}
-            className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono text-sm"
-          />
-          <p className="text-xs text-muted-foreground mt-1">{formData.content.length} characters</p>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold">Chapters ({chapterCount})</p>
+              <p className="text-xs text-muted-foreground">
+                Add each chapter individually. You can save a draft and return later before minting.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={persistDraft}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:border-primary"
+              >
+                <Save size={14} /> Save Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearDraft()
+                  setFormData({
+                    title: "",
+                    author: "",
+                    category: "",
+                    description: "",
+                    tags: "",
+                    tribe: "",
+                    language: "",
+                  })
+                  setChapters([createChapter(0)])
+                  setImagePreview(null)
+                }}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:border-destructive/50"
+              >
+                <Trash2 size={14} /> Clear Draft
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {chapters.map((chapter, index) => (
+              <div key={chapter.id} className="rounded-lg border border-border bg-card/40 p-4 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <BookOpen size={16} className="text-primary" />
+                    <span className="text-sm font-semibold">Chapter {index + 1}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleUndo(chapter.id)}
+                      className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:border-primary hover:text-primary"
+                    >
+                      <Undo size={12} /> Undo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRedo(chapter.id)}
+                      className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:border-primary hover:text-primary"
+                    >
+                      <Redo size={12} /> Redo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveChapter(chapter.id)}
+                      className="inline-flex items-center gap-1 rounded border border-destructive/50 px-2 py-1 text-xs text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 size={12} /> Delete
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-3 space-y-3">
+                  <input
+                    type="text"
+                    value={chapter.title}
+                    onChange={(event) => handleChapterTitleChange(chapter.id, event.target.value)}
+                    placeholder="Chapter title"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => applyWrapFormatting(chapter.id, "**")}
+                      className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs hover:border-primary"
+                    >
+                      <Bold size={12} /> Bold
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyWrapFormatting(chapter.id, "*")}
+                      className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs hover:border-primary"
+                    >
+                      <Italic size={12} /> Italic
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyWrapFormatting(chapter.id, "<u>", "</u>")}
+                      className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs hover:border-primary"
+                    >
+                      <Underline size={12} /> Underline
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyLineFormatting(chapter.id, "- ")}
+                      className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs hover:border-primary"
+                    >
+                      <List size={12} /> Bullet List
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyLineFormatting(chapter.id, "> ")}
+                      className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs hover:border-primary"
+                    >
+                      <Quote size={12} /> Quote
+                    </button>
+                  </div>
+
+                  <textarea
+                    ref={setTextAreaRef(chapter.id)}
+                    value={chapter.content}
+                    onChange={(event) => handleChapterContentChange(chapter.id, event.target.value)}
+                    rows={8}
+                    placeholder="Write this chapter in rich Markdown (bold, italics, lists, quotes)."
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-xs text-muted-foreground">Markdown is supported. Use the toolbar to format your chapter content.</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddChapter}
+            className="inline-flex items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10"
+          >
+            <Plus size={16} /> Add Another Chapter
+          </button>
         </div>
 
-        {/* Tags */}
         <div>
           <label htmlFor="tags" className="block text-sm font-semibold mb-2">
             Tags
@@ -504,16 +840,15 @@ export default function StoryUploadForm() {
             name="tags"
             value={formData.tags}
             onChange={handleInputChange}
-            placeholder="e.g., folklore, mythology, cultural, separated by commas"
-            className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="e.g., folklore, mythology, cultural — separated by commas"
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={isLoading || !isConnected}
-          className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoading ? (
             <>
@@ -523,21 +858,19 @@ export default function StoryUploadForm() {
             </>
           ) : (
             <>
-              <Upload size={20} />
-              Mint Story as NFT
+              <Upload size={20} /> Mint Story as NFT
             </>
           )}
         </button>
 
-        {/* Info */}
-        <div className="p-4 rounded-lg bg-muted/50 border border-border text-sm text-muted-foreground">
+        <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
           <p className="font-semibold mb-2">Before you mint:</p>
-          <ul className="space-y-1 list-disc list-inside">
-            <li>Ensure your story is original and copyright-free</li>
-            <li>Cover image should be at least 1200x800px</li>
-            <li>You retain full ownership of your story</li>
-            <li>Your story will be permanently stored on Polygon Mumbai testnet</li>
-            <li>Connect your MetaMask wallet to Polygon Mumbai network</li>
+          <ul className="list-inside list-disc space-y-1">
+            <li>Ensure your story and chapters are original and copyright-free.</li>
+            <li>Cover image should be at least 1200x800px.</li>
+            <li>You retain full ownership of your story.</li>
+            <li>Your story and chapters will be permanently stored on the blockchain.</li>
+            <li>Connect your MetaMask wallet to the Polygon Mumbai testnet.</li>
           </ul>
         </div>
       </form>

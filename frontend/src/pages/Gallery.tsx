@@ -67,16 +67,26 @@ export default function Gallery() {
   }, [stories, searchQuery, selectedCategory, sortBy])
 
   // Transform API story to StoryCard format
-  const transformStory = (story: Story) => ({
-    id: story.tokenId,
-    title: story.title || "Untitled Story",
-    author: story.author.slice(0, 6) + "..." + story.author.slice(-4),
-    category: story.tribe || "Contemporary",
-    image: story.metadata?.image || story.ipfsUrl || "/placeholder.svg",
-    description: story.description || "A story from Afriverse Tales",
-    views: 0,
-    likes: 0,
-  })
+  const transformStory = (story: Story) => {
+    const metadata = story.metadata || {}
+    const gateway = import.meta.env.VITE_IPFS_GATEWAY || "https://ipfs.io/ipfs/"
+    const rawImage = metadata.image || story.ipfsUrl
+    const coverImage = typeof rawImage === "string" && rawImage.startsWith("ipfs://") ? rawImage.replace("ipfs://", gateway) : rawImage || "/placeholder.svg"
+    const chapters = Array.isArray(metadata.chapters) ? metadata.chapters : []
+    const firstChapter = chapters[0]
+    const summary = metadata.summary || firstChapter?.contentText || story.description || "A story from Afriverse Tales"
+
+    return {
+      id: story.tokenId,
+      title: story.title || metadata.name || "Untitled Story",
+      author: story.author ? `${story.author.slice(0, 6)}...${story.author.slice(-4)}` : "Anonymous",
+      category: story.tribe || metadata.category || "Contemporary",
+      image: coverImage,
+      description: summary,
+      views: 0,
+      likes: 0,
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative">

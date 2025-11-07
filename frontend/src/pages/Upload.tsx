@@ -9,8 +9,8 @@ export default function Upload() {
   const benefits = [
     {
       icon: BookOpen,
-      title: "Share Your Legacy",
-      description: "Preserve your stories for generations to come.",
+      title: "Chapter-by-Chapter Publishing",
+      description: "Add chapters over time, format with rich tools, and keep crafting until you are ready to mint.",
     },
     {
       icon: Cloud,
@@ -39,11 +39,11 @@ export default function Upload() {
         <TribalPatternOverlay />
         <div className="max-w-4xl mx-auto text-center mb-12 relative z-10">
           <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-foreground text-balance">
-            Mint Your Story on Polygon Mumbai Testnet
+            Mint Your Story Chapter by Chapter
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Transform your African narrative into an NFT and join the movement preserving cultural heritage. Each mint
-            creates an immutable record of your ownership and authorship.
+            Craft your narrative over time with searchable cultural data and rich editing tools. When you are ready,
+            mint on Polygon Mumbai to create an immutable record of authorship and heritage.
           </p>
         </div>
 
