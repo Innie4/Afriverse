@@ -8,7 +8,10 @@ export default function Navbar() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/gallery", label: "Gallery" },
-    { href: "/upload", label: "Upload Story" },
+    { href: "/upload", label: "Upload" },
+    { href: "/documentation", label: "Documentation" },
+    { href: "/blog", label: "Blog" },
+    { href: "/faq", label: "FAQ" },
     { href: "/my-stories", label: "My Stories" },
     { href: "/about", label: "About" },
   ]
@@ -18,11 +21,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">A</span>
-            </div>
-            <span className="font-bold text-lg hidden sm:inline text-primary">Afriverse</span>
+          <Link to="/" className="flex items-center gap-3 group">
+            <img
+              src="/afriverse-logo.png"
+              alt="Afriverse Tales logo"
+              className="h-10 w-auto transition-transform group-hover:scale-[1.03]"
+            />
+            <span className="font-bold text-lg hidden sm:inline text-primary">Afriverse Tales</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -44,7 +49,7 @@ export default function Navbar() {
               to="/upload"
               className="px-6 py-2 bg-accent text-accent-foreground rounded-lg font-medium hover:bg-accent/90 transition-colors"
             >
-              Mint Story
+              Mint Work
             </Link>
           </div>
 
@@ -72,7 +77,7 @@ export default function Navbar() {
               className="block px-4 py-2 bg-accent text-accent-foreground rounded-lg font-medium hover:bg-accent/90 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              Mint Story
+              Mint Work
             </Link>
           </div>
         )}

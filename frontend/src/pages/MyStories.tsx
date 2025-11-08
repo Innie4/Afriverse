@@ -40,16 +40,23 @@ export default function MyStories() {
   const transformStory = (story: Story) => {
     const metadata = story.metadata || {}
     const gateway = import.meta.env.VITE_IPFS_GATEWAY || "https://ipfs.io/ipfs/"
-    const cover = typeof metadata.image === "string" && metadata.image.startsWith("ipfs://") ? metadata.image.replace("ipfs://", gateway) : metadata.image || story.ipfsUrl || "/placeholder.svg"
+    const cover =
+      typeof metadata.image === "string" && metadata.image.startsWith("ipfs://")
+        ? metadata.image.replace("ipfs://", gateway)
+        : metadata.image || story.ipfsUrl || "/placeholder.svg"
     const chapters = Array.isArray(metadata.chapters) ? metadata.chapters : []
     const firstChapter = chapters[0]
+    const expressionAttr =
+      metadata.expressionType ||
+      metadata.attributes?.find((attr: any) => attr?.trait_type === "Expression Type")?.value ||
+      metadata.category
     const summary = metadata.summary || firstChapter?.contentText || story.description || "A story about my journey"
 
     return {
       id: story.tokenId,
       title: story.title || metadata.name || "Untitled Story",
       author: "You",
-      category: story.tribe || metadata.category || "Personal",
+      category: expressionAttr || story.tribe || "Personal",
       image: cover,
       description: summary,
       views: 0,

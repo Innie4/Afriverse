@@ -29,6 +29,9 @@ import { SearchableSelect } from "@/components/searchable-select"
 import { SearchableMultiSelect } from "@/components/searchable-multi-select"
 import { marked } from "marked"
 import DOMPurify from "dompurify"
+import { cn } from "@/lib/utils"
+
+type ExpressionType = "writer" | "artist" | "folklore" | "filmmaker"
 
 interface StoryFormState {
   title: string
@@ -39,6 +42,7 @@ interface StoryFormState {
   tags: string
   tribe: string
   language: string
+  expressionType: ExpressionType
 }
 
 interface Chapter {
@@ -60,6 +64,64 @@ const categories = [
 
 const DRAFT_STORAGE_KEY = "afriverse-tales-story-draft"
 
+const expressionOptions: Array<{ value: ExpressionType; label: string; description: string }> = [
+  {
+    value: "writer",
+    label: "Writers & Poets",
+    description: "Draft prose, poetry, essays, or narrative anthologies.",
+  },
+  {
+    value: "artist",
+    label: "Visual Artists",
+    description: "Document visual concepts, mood boards, and creative process notes.",
+  },
+  {
+    value: "folklore",
+    label: "Folklore Curators",
+    description: "Transcribe oral histories, myths, and cultural rituals.",
+  },
+  {
+    value: "filmmaker",
+    label: "Filmmakers & Musicians",
+    description: "Share storyboards, scripts, lyric sheets, or track listings.",
+  },
+]
+
+const expressionDetails: Record<
+  ExpressionType,
+  {
+    sectionHeading: string
+    sectionName: string
+    chapterPlaceholder: string
+    toolbarHint: string
+  }
+> = {
+  writer: {
+    sectionHeading: "Chapters for writers & poets",
+    sectionName: "Chapter",
+    chapterPlaceholder: "Write narrative passages, dialogue, poetry, or essays using markdown formatting.",
+    toolbarHint: "Use bold for emphasis, italics for tone, bullet lists for motifs, and quotes for oral recitations.",
+  },
+  artist: {
+    sectionHeading: "Visual concept notes & canvases",
+    sectionName: "Canvas Note",
+    chapterPlaceholder: "Describe each artwork’s medium, palette, cultural influence, or showcase concept sketches.",
+    toolbarHint: "List materials, embed references, and quote collaborator notes to track your creative process.",
+  },
+  folklore: {
+    sectionHeading: "Oral histories & folklore transcriptions",
+    sectionName: "Story Section",
+    chapterPlaceholder: "Transcribe oral traditions, storyteller notes, context, and cultural significance.",
+    toolbarHint: "Capture narrator names, locations, and ritual details using headings, lists, and blockquotes.",
+  },
+  filmmaker: {
+    sectionHeading: "Scenes, scripts, and soundscapes",
+    sectionName: "Scene",
+    chapterPlaceholder: "Break down scenes, storyboards, lyric sheets, tracklists, and production notes.",
+    toolbarHint: "Use headings for scenes, bullet lists for beats, and blockquotes for dialogue or lyric snippets.",
+  },
+}
+
 const createChapter = (index: number): Chapter => ({
   id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `chapter-${Date.now()}-${index}`,
   title: `Chapter ${index + 1}`,
@@ -79,6 +141,7 @@ export default function StoryUploadForm() {
     tags: "",
     tribe: "",
     language: "",
+    expressionType: "writer",
   })
   const [chapters, setChapters] = useState<Chapter[]>([createChapter(0)])
   const textAreaRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map())
@@ -93,6 +156,21 @@ export default function StoryUploadForm() {
   const [txHash, setTxHash] = useState<string | null>(null)
   const [tokenId, setTokenId] = useState<string | null>(null)
   const [step, setStep] = useState<"form" | "uploading" | "minting" | "success">("form")
+
+  const expressionConfig = expressionDetails[formData.expressionType]
+  const activeExpression = expressionOptions.find((option) => option.value === formData.expressionType)
+  const tribeOptions = useMemo(
+    () => Array.from(new Set(AFRICAN_TRIBES)).map((tribe) => ({ value: tribe, label: tribe })),
+    []
+  )
+  const languageOptions = useMemo(
+    () => Array.from(new Set(AFRICAN_LANGUAGES)).map((language) => ({ value: language, label: language })),
+    []
+  )
+  const genreOptions = useMemo(
+    () => Array.from(new Set(AFRICAN_GENRES)).map((genre) => ({ value: genre, label: genre })),
+    []
+  )
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -154,6 +232,18 @@ export default function StoryUploadForm() {
       toast.success("Draft cleared.")
     }
   }
+
+  useEffect(() => {
+    setChapters((previous) =>
+      previous.map((chapter, index) => {
+        const defaultTitles = Object.values(expressionDetails).map((detail) => `${detail.sectionName} ${index + 1}`)
+        if (defaultTitles.includes(chapter.title) || chapter.title.trim().length === 0) {
+          return { ...chapter, title: `${expressionDetails[formData.expressionType].sectionName} ${index + 1}` }
+        }
+        return chapter
+      })
+    )
+  }, [formData.expressionType])
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target
@@ -278,20 +368,29 @@ export default function StoryUploadForm() {
   }
 
   const handleAddChapter = () => {
+    const lastChapter = chapters[chapters.length - 1]
+    if (lastChapter && lastChapter.content.trim().length === 0) {
+      toast.error(`Finish the current ${expressionConfig.sectionName.toLowerCase()} before adding a new one.`)
+      return
+    }
     setChapters((previous) => {
-      const nextChapter = createChapter(previous.length)
+      const nextChapter = {
+        ...createChapter(previous.length),
+        title: `${expressionConfig.sectionName} ${previous.length + 1}`,
+      }
       undoStack.current[nextChapter.id] = []
       redoStack.current[nextChapter.id] = []
-      setTimeout(() => {
+      const next = [...previous, nextChapter]
+      requestAnimationFrame(() => {
         textAreaRefs.current.get(nextChapter.id)?.focus()
-      }, 200)
-      return [...previous, nextChapter]
+      })
+      return next
     })
   }
 
   const handleRemoveChapter = (id: string) => {
     if (chapters.length === 1) {
-      toast.error("Your story needs at least one chapter.")
+      toast.error(`Your work needs at least one ${expressionConfig.sectionName.toLowerCase()}.`)
       return
     }
     setChapters((previous) => previous.filter((chapter) => chapter.id !== id))
@@ -365,7 +464,7 @@ export default function StoryUploadForm() {
         .filter(Boolean)
 
       if (!normalizedChapters.length) {
-        throw new Error("Chapter content missing. Please add text to your story.")
+        throw new Error("Chapter content missing. Please add text to your creative work.")
       }
 
       let imageHash = ""
@@ -390,6 +489,7 @@ export default function StoryUploadForm() {
           { trait_type: "Tribe", value: formData.tribe },
           { trait_type: "Language", value: formData.language },
           { trait_type: "Author", value: formData.author },
+          { trait_type: "Expression Type", value: activeExpression?.label ?? formData.expressionType },
           { trait_type: "Chapters", value: normalizedChapters.length.toString() },
           ...(selectedGenres.length ? [{ trait_type: "Tags", value: selectedGenres.join(", ") }] : []),
         ],
@@ -397,6 +497,7 @@ export default function StoryUploadForm() {
         tags: selectedGenres,
         chapters: normalizedChapters,
         content: combinedContent,
+        expressionType: formData.expressionType,
       }
 
       const metadataResult = await uploadMetadataToIPFS(metadata)
@@ -413,7 +514,7 @@ export default function StoryUploadForm() {
         setStep("success")
         setShowTransaction(false)
         setSuccess(true)
-        toast.success("Story minted successfully!")
+        toast.success("Creative work minted successfully!")
 
         setFormData({
           title: "",
@@ -423,6 +524,7 @@ export default function StoryUploadForm() {
           tags: "",
           tribe: "",
           language: "",
+          expressionType: formData.expressionType,
         })
         setChapters([createChapter(0)])
         setImagePreview(null)
@@ -434,14 +536,14 @@ export default function StoryUploadForm() {
           setStep("form")
         }, 5000)
       } else {
-        const errorMessage = result.error || "Failed to mint story"
+        const errorMessage = result.error || "Failed to mint creative work"
         setError(errorMessage)
         toast.error(errorMessage)
         setStep("form")
         setShowTransaction(false)
       }
     } catch (submissionError: any) {
-      const message = submissionError.message || "Failed to upload story. Please try again."
+      const message = submissionError.message || "Failed to upload your creative work. Please try again."
       setError(message)
       toast.error(message)
       setStep("form")
@@ -469,7 +571,7 @@ export default function StoryUploadForm() {
               <div>
                 <p className="font-semibold text-sm">Connect Wallet to Mint</p>
                 <p className="text-xs text-muted-foreground">
-                  {checkMetaMask() ? "Connect your MetaMask wallet to continue" : "Install MetaMask to mint your story"}
+                  {checkMetaMask() ? "Connect your MetaMask wallet to continue" : "Install MetaMask to mint your work"}
                 </p>
               </div>
             </div>
@@ -519,7 +621,7 @@ export default function StoryUploadForm() {
                 <div className="w-32 h-32">
                   <TransactionAnimation className="w-full h-full" />
                 </div>
-                <p className="font-semibold text-lg">Minting Your Story...</p>
+                <p className="font-semibold text-lg">Minting Your Creative Work...</p>
                 <p className="text-sm text-muted-foreground text-center">
                   {step === "uploading" && "Uploading to IPFS..."}
                   {step === "minting" && "Transaction in progress. Please confirm in MetaMask."}
@@ -542,8 +644,8 @@ export default function StoryUploadForm() {
                   <SuccessAnimation className="w-full h-full" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold mb-2">Story Minted Successfully! 🎉</p>
-                  <p className="text-sm mb-4">Your story has been permanently recorded on the blockchain.</p>
+                  <p className="font-semibold mb-2">Creative Work Minted Successfully! 🎉</p>
+                  <p className="text-sm mb-4">Your creative expression has been permanently recorded on the blockchain.</p>
                   {txHash && (
                     <div className="space-y-2">
                       {tokenId && (
@@ -582,6 +684,32 @@ export default function StoryUploadForm() {
         </AnimatePresence>
 
         <div>
+          <p className="text-sm font-semibold mb-2">What are you uploading?</p>
+          <p className="text-xs text-muted-foreground mb-3">
+            Select the creative expression that best describes this submission. We tailor tips and metadata for your choice.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {expressionOptions.map((option) => {
+              const isActive = formData.expressionType === option.value
+              return (
+                <button
+                  type="button"
+                  key={option.value}
+                  onClick={() => setFormData((previous) => ({ ...previous, expressionType: option.value }))}
+                  className={cn(
+                    "rounded-xl border border-border bg-card/60 p-4 text-left transition hover:border-primary/60 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary",
+                    isActive && "border-primary bg-primary/10 shadow-md"
+                  )}
+                >
+                  <p className="text-sm font-semibold text-foreground">{option.label}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{option.description}</p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div>
           <label className="block text-sm font-semibold mb-2">Story Cover Image</label>
           <div className="relative border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-muted/30">
             <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
@@ -602,7 +730,7 @@ export default function StoryUploadForm() {
 
         <div>
           <label htmlFor="title" className="block text-sm font-semibold mb-2">
-            Story Title *
+            Work Title *
           </label>
           <input
             type="text"
@@ -610,14 +738,14 @@ export default function StoryUploadForm() {
             name="title"
             value={formData.title}
             onChange={handleInputChange}
-            placeholder="Enter your story title"
+            placeholder="Enter the title of your work"
             className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
         <div>
           <label htmlFor="author" className="block text-sm font-semibold mb-2">
-            Author Name *
+            Creator Name *
           </label>
           <input
             type="text"
@@ -625,7 +753,7 @@ export default function StoryUploadForm() {
             name="author"
             value={formData.author}
             onChange={handleInputChange}
-            placeholder="Your name or pen name"
+            placeholder="Your name, collective, or pen name"
             className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -639,7 +767,7 @@ export default function StoryUploadForm() {
               setFormData((previous) => ({ ...previous, tribe: nextValue }))
               setError("")
             }}
-            options={AFRICAN_TRIBES}
+            options={tribeOptions}
             placeholder="Search and select a tribe or cultural group"
             helperText="We curated a wide list across Africa. Start typing to search."
           />
@@ -654,9 +782,9 @@ export default function StoryUploadForm() {
               setFormData((previous) => ({ ...previous, language: nextValue }))
               setError("")
             }}
-            options={AFRICAN_LANGUAGES}
+            options={languageOptions}
             placeholder="Search languages spoken across Africa"
-            helperText="Select the primary language of this story."
+            helperText="Select the primary language of this work."
           />
         </div>
 
@@ -689,7 +817,7 @@ export default function StoryUploadForm() {
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            placeholder="Brief summary of your story (max 200 characters)"
+            placeholder="Brief summary of your work (max 200 characters)"
             maxLength={200}
             rows={3}
             className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
@@ -700,9 +828,11 @@ export default function StoryUploadForm() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold">Chapters ({chapterCount})</p>
+              <p className="text-sm font-semibold">
+                {expressionConfig.sectionHeading} ({chapterCount})
+              </p>
               <p className="text-xs text-muted-foreground">
-                Add each chapter individually. You can save a draft and return later before minting.
+                {activeExpression?.description || "Structure each section, save drafts, and return any time before minting."}
               </p>
             </div>
             <div className="flex gap-2">
@@ -725,6 +855,7 @@ export default function StoryUploadForm() {
                     tags: "",
                     tribe: "",
                     language: "",
+                    expressionType: "writer",
                   })
                   setChapters([createChapter(0)])
                   setImagePreview(null)
@@ -743,7 +874,9 @@ export default function StoryUploadForm() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <BookOpen size={16} className="text-primary" />
-                    <span className="text-sm font-semibold">Chapter {index + 1}</span>
+                    <span className="text-sm font-semibold">
+                      {expressionConfig.sectionName} {index + 1}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -775,7 +908,7 @@ export default function StoryUploadForm() {
                     type="text"
                     value={chapter.title}
                     onChange={(event) => handleChapterTitleChange(chapter.id, event.target.value)}
-                    placeholder="Chapter title"
+                    placeholder={`${expressionConfig.sectionName} title`}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   />
 
@@ -822,10 +955,10 @@ export default function StoryUploadForm() {
                     value={chapter.content}
                     onChange={(event) => handleChapterContentChange(chapter.id, event.target.value)}
                     rows={8}
-                    placeholder="Write this chapter in rich Markdown (bold, italics, lists, quotes)."
+                    placeholder={expressionConfig.chapterPlaceholder}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  <p className="text-xs text-muted-foreground">Markdown is supported. Use the toolbar to format your chapter content.</p>
+                  <p className="text-xs text-muted-foreground">{expressionConfig.toolbarHint}</p>
                 </div>
               </div>
             ))}
@@ -836,7 +969,7 @@ export default function StoryUploadForm() {
             onClick={handleAddChapter}
             className="inline-flex items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10"
           >
-            <Plus size={16} /> Add Another Chapter
+          <Plus size={16} /> Add Another {expressionConfig.sectionName}
           </button>
         </div>
 
@@ -850,9 +983,9 @@ export default function StoryUploadForm() {
               setFormData((previous) => ({ ...previous, tags: nextValues.join(", ") }))
               setError("")
             }}
-            options={AFRICAN_GENRES}
-            placeholder="Select relevant genres"
-            helperText="Choose one or multiple genres to help readers discover your story."
+          options={genreOptions}
+          placeholder="Select relevant genres"
+          helperText="Choose one or multiple genres to help the community discover your work."
           />
         </div>
 
@@ -865,11 +998,11 @@ export default function StoryUploadForm() {
             <>
               <Loader2 size={20} className="animate-spin" />
               {step === "uploading" && "Uploading to IPFS..."}
-              {step === "minting" && "Minting Your Story..."}
+              {step === "minting" && "Minting Your Creative Work..."}
             </>
           ) : (
             <>
-              <Upload size={20} /> Mint Story as NFT
+              <Upload size={20} /> Mint Creative Work
             </>
           )}
         </button>
@@ -877,10 +1010,10 @@ export default function StoryUploadForm() {
         <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
           <p className="font-semibold mb-2">Before you mint:</p>
           <ul className="list-inside list-disc space-y-1">
-            <li>Ensure your story and chapters are original and copyright-free.</li>
+            <li>Ensure your work and sections are original and copyright-free.</li>
             <li>Cover image should be at least 1200x800px.</li>
-            <li>You retain full ownership of your story.</li>
-            <li>Your story and chapters will be permanently stored on the blockchain.</li>
+            <li>You retain full ownership of your work.</li>
+            <li>Your creative expressions will be permanently stored on the blockchain.</li>
             <li>Connect your MetaMask wallet to the Polygon Mumbai testnet.</li>
           </ul>
         </div>

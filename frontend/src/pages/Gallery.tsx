@@ -71,16 +71,21 @@ export default function Gallery() {
     const metadata = story.metadata || {}
     const gateway = import.meta.env.VITE_IPFS_GATEWAY || "https://ipfs.io/ipfs/"
     const rawImage = metadata.image || story.ipfsUrl
-    const coverImage = typeof rawImage === "string" && rawImage.startsWith("ipfs://") ? rawImage.replace("ipfs://", gateway) : rawImage || "/placeholder.svg"
+    const coverImage =
+      typeof rawImage === "string" && rawImage.startsWith("ipfs://") ? rawImage.replace("ipfs://", gateway) : rawImage || "/placeholder.svg"
     const chapters = Array.isArray(metadata.chapters) ? metadata.chapters : []
     const firstChapter = chapters[0]
+    const expressionAttr =
+      metadata.expressionType ||
+      metadata.attributes?.find((attr: any) => attr?.trait_type === "Expression Type")?.value ||
+      metadata.category
     const summary = metadata.summary || firstChapter?.contentText || story.description || "A story from Afriverse Tales"
 
     return {
       id: story.tokenId,
       title: story.title || metadata.name || "Untitled Story",
       author: story.author ? `${story.author.slice(0, 6)}...${story.author.slice(-4)}` : "Anonymous",
-      category: story.tribe || metadata.category || "Contemporary",
+      category: expressionAttr || story.tribe || "Contemporary",
       image: coverImage,
       description: summary,
       views: 0,

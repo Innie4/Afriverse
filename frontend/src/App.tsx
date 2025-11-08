@@ -8,6 +8,9 @@ import Upload from '@/pages/Upload'
 import StoryDetail from '@/pages/StoryDetail'
 import MyStories from '@/pages/MyStories'
 import About from '@/pages/About'
+import Documentation from '@/pages/Documentation'
+import Blog from '@/pages/Blog'
+import FAQ from '@/pages/FAQ'
 import './index.css'
 
 function App() {
@@ -23,6 +26,9 @@ function App() {
               <Route path="/upload" element={<Upload />} />
               <Route path="/story/:id" element={<StoryDetail />} />
               <Route path="/my-stories" element={<MyStories />} />
+              <Route path="/documentation" element={<Documentation />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/faq" element={<FAQ />} />
               <Route path="/about" element={<About />} />
             </Routes>
           </AnimatePresence>

@@ -114,6 +114,8 @@ export default function StoryDetail() {
     .flatMap((attr: any) => (attr.value as string).split(/[,;]+/).map((tag) => tag.trim()))
   const metadataTags = Array.isArray(metadata.tags) ? metadata.tags : []
   const tags = Array.from(new Set([...metadataTags, ...attributeTags].filter(Boolean)))
+  const expressionAttr =
+    metadata.expressionType || attributeArray.find((attr: any) => attr?.trait_type === "Expression Type")?.value || "Creative Work"
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -134,9 +136,16 @@ export default function StoryDetail() {
         <div className="max-w-3xl mx-auto">
           {/* Header Card */}
           <div className="bg-card border border-border rounded-xl p-8 mb-8 shadow-lg">
-            {/* Category Badge */}
-            <div className="inline-block px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold mb-4">
-              {story.tribe || "Story"}
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold text-primary">
+                {expressionAttr}
+              </span>
+              {story.tribe && (
+                <span className="inline-flex items-center rounded-full bg-muted px-4 py-1 text-xs font-semibold text-muted-foreground">
+                  {story.tribe}
+                </span>
+              )}
             </div>
 
             {/* Title */}
@@ -245,7 +254,7 @@ export default function StoryDetail() {
                         dangerouslySetInnerHTML={{ __html: safeHtml }}
                       />
                       <p className="text-xs text-muted-foreground">
-                        {plainText.length} characters • Chapter {index + 1} of {chapters.length}
+                        {plainText.length} characters • Section {index + 1} of {chapters.length}
                       </p>
                     </article>
                   )
