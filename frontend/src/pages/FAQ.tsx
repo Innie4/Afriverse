@@ -44,7 +44,7 @@ export default function FAQ() {
           </header>
 
           <div className="space-y-4">
-            {faqs.map((item, index) => (
+            {faqs.map((item) => (
               <details
                 key={item.question}
                 className="overflow-hidden rounded-xl border border-border bg-card/60 shadow-sm transition hover:border-primary/60"

@@ -25,6 +25,7 @@ import { toast } from "sonner"
 import { AFRICAN_TRIBES } from "@/data/tribes"
 import { AFRICAN_LANGUAGES } from "@/data/languages"
 import { AFRICAN_GENRES } from "@/data/genres"
+import type { SelectOption } from "@/data/select-options"
 import { SearchableSelect } from "@/components/searchable-select"
 import { SearchableMultiSelect } from "@/components/searchable-multi-select"
 import { marked } from "marked"
@@ -159,18 +160,9 @@ export default function StoryUploadForm() {
 
   const expressionConfig = expressionDetails[formData.expressionType]
   const activeExpression = expressionOptions.find((option) => option.value === formData.expressionType)
-  const tribeOptions = useMemo(
-    () => Array.from(new Set(AFRICAN_TRIBES)).map((tribe) => ({ value: tribe, label: tribe })),
-    []
-  )
-  const languageOptions = useMemo(
-    () => Array.from(new Set(AFRICAN_LANGUAGES)).map((language) => ({ value: language, label: language })),
-    []
-  )
-  const genreOptions = useMemo(
-    () => Array.from(new Set(AFRICAN_GENRES)).map((genre) => ({ value: genre, label: genre })),
-    []
-  )
+  const tribeOptions = useMemo<SelectOption[]>(() => AFRICAN_TRIBES, [])
+  const languageOptions = useMemo<SelectOption[]>(() => AFRICAN_LANGUAGES, [])
+  const genreOptions = useMemo<SelectOption[]>(() => AFRICAN_GENRES, [])
 
   useEffect(() => {
     if (typeof window === "undefined") return
