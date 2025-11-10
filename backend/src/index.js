@@ -100,16 +100,16 @@ async function initializeServices() {
     initIPFS()
     logger.info("IPFS service initialized")
 
-    // Initialize event listener
-    initEventListener()
-    logger.info("Event listener initialized")
-
-    // Start listening for events
-    if (process.env.RPC_URL && process.env.CONTRACT_ADDRESS) {
+    // Conditionally initialize/start event listener (bypassable)
+    const enableListener = (process.env.ENABLE_EVENT_LISTENER || "true").toLowerCase() !== "false"
+    const validContract = /^0x[a-fA-F0-9]{40}$/.test(process.env.CONTRACT_ADDRESS || "")
+    if (enableListener && process.env.RPC_URL && validContract) {
+      initEventListener()
+      logger.info("Event listener initialized")
       await startEventListener()
       logger.info("Event listener started")
     } else {
-      logger.warn("Event listener not started - missing RPC_URL or CONTRACT_ADDRESS")
+      logger.warn("Event listener disabled or not started - check ENABLE_EVENT_LISTENER, RPC_URL, valid CONTRACT_ADDRESS")
     }
 
     logger.info("All services initialized successfully")

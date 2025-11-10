@@ -1,7 +1,7 @@
 // Express routes
 import express from "express"
 import multer from "multer"
-import { getStories, getStoryById, getStoryStats } from "../controllers/storyController.js"
+import { getStories, getStoryById, getStoryStats, createStory } from "../controllers/storyController.js"
 import { uploadFile, uploadMetadata, healthCheck } from "../controllers/uploadController.js"
 import logger from "../config/logger.js"
 
@@ -26,6 +26,7 @@ router.get("/health", healthCheck)
 router.get("/stories", getStories)
 router.get("/stories/stats", getStoryStats)
 router.get("/stories/:id", getStoryById)
+router.post("/stories", createStory)
 
 // Upload routes
 router.post("/upload", upload.single("file"), uploadFile)

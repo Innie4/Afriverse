@@ -2,9 +2,11 @@ import { useState, useEffect } from "react"
 import { BrowserProvider, Contract, ethers } from "ethers"
 import AfriverseTalesABI from "@/contracts/AfriverseTales.json"
 
-// Polygon Mumbai testnet configuration
-const MUMBAI_CHAIN_ID = 80001
-const MUMBAI_RPC = "https://rpc-mumbai.maticvigil.com"
+// Network configuration (defaults to Polygon mainnet)
+const CHAIN_ID = Number(import.meta.env.VITE_CHAIN_ID || 137)
+const RPC_URL = import.meta.env.VITE_RPC_URL || "https://polygon-rpc.com"
+const CHAIN_NAME = import.meta.env.VITE_CHAIN_NAME || "Polygon"
+const BLOCK_EXPLORER_URL = import.meta.env.VITE_BLOCK_EXPLORER_URL || "https://polygonscan.com/"
 
 // Contract address from environment variable
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || ""
@@ -56,29 +58,29 @@ export function useWeb3() {
       const network = await provider.getNetwork()
       const chainId = Number(network.chainId)
 
-      // Check if on Mumbai testnet
-      if (chainId !== MUMBAI_CHAIN_ID) {
+      // Ensure wallet is on the configured chain (default: Polygon mainnet)
+      if (chainId !== CHAIN_ID) {
         try {
           await window.ethereum.request({
             method: "wallet_switchEthereumChain",
-            params: [{ chainId: `0x${MUMBAI_CHAIN_ID.toString(16)}` }],
+            params: [{ chainId: `0x${CHAIN_ID.toString(16)}` }],
           })
         } catch (switchError: any) {
-          // Chain doesn't exist, add it
+          // If the chain is not available in the wallet, add it
           if (switchError.code === 4902) {
             await window.ethereum.request({
               method: "wallet_addEthereumChain",
               params: [
                 {
-                  chainId: `0x${MUMBAI_CHAIN_ID.toString(16)}`,
-                  chainName: "Polygon Mumbai",
+                  chainId: `0x${CHAIN_ID.toString(16)}`,
+                  chainName: CHAIN_NAME,
                   nativeCurrency: {
                     name: "MATIC",
                     symbol: "MATIC",
                     decimals: 18,
                   },
-                  rpcUrls: [MUMBAI_RPC],
-                  blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
+                  rpcUrls: [RPC_URL],
+                  blockExplorerUrls: [BLOCK_EXPLORER_URL],
                 },
               ],
             })

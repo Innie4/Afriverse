@@ -130,6 +130,32 @@ export async function uploadMetadataToIPFS(metadata: Record<string, any>): Promi
 }
 
 /**
+ * Create a story off-chain (bypass smart contract)
+ */
+export async function createStoryOffchain(payload: {
+  ipfsHash: string
+  author: string
+  tribe?: string
+  language?: string
+  title?: string
+  description?: string
+  metadata?: Record<string, any>
+}): Promise<{ success: boolean; story: Story }> {
+  const response = await fetch(`${API_BASE_URL}/stories`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: response.statusText }))
+    throw new Error(error.error || `Failed to create story: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
+/**
  * Health check endpoint
  */
 export async function healthCheck(): Promise<{ status: string; timestamp: string }> {

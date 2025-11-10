@@ -1,7 +1,7 @@
 // IPFS upload service using web3.storage
 import { Web3Storage } from "web3.storage"
 import { File } from "web3.storage"
-import logger from "./logger.js"
+import logger from "../config/logger.js"
 
 let storageClient = null
 
@@ -69,6 +69,9 @@ export async function uploadMetadataToIPFS(metadata, filename = "metadata.json")
  * @returns {string} Gateway URL
  */
 export function getIPFSGatewayURL(cid) {
+  if (!cid || typeof cid !== "string") return null
+  // If IPFS is down and we saved a placeholder, do not return a gateway URL
+  if (cid.startsWith("PENDING_IPFS")) return null
   const gateway = process.env.IPFS_GATEWAY_URL || "https://ipfs.io/ipfs/"
   return `${gateway}${cid}`
 }

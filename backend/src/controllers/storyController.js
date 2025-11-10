@@ -168,3 +168,61 @@ export async function getStoryStats(req, res, next) {
   }
 }
 
+/**
+ * Create a story record off-chain (bypass smart contract)
+ */
+export async function createStory(req, res, next) {
+  try {
+    const { ipfsHash, author, tribe, language, title, description, metadata } = req.body
+
+    // Allow creation without IPFS when service is down; use a placeholder
+    const effectiveIpfsHash = typeof ipfsHash === "string" && ipfsHash.trim().length > 0 ? ipfsHash : `PENDING_IPFS_${Date.now()}`
+
+    if (!author || typeof author !== "string") {
+      return res.status(400).json({ error: "author is required" })
+    }
+
+    // Derive next tokenId when bypassing on-chain mint
+    const nextIdResult = await query("SELECT COALESCE(MAX(token_id), -1) + 1 AS next_id FROM stories")
+    const tokenId = parseInt(nextIdResult.rows[0].next_id)
+
+    const insertQuery = `
+      INSERT INTO stories (token_id, ipfs_hash, author, tribe, language, title, description, metadata, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+      RETURNING id
+    `
+
+    const result = await query(insertQuery, [
+      tokenId,
+      effectiveIpfsHash,
+      author,
+      tribe || null,
+      language || null,
+      title || null,
+      description || null,
+      metadata ? JSON.stringify(metadata) : null,
+    ])
+
+    const created = {
+      id: result.rows[0].id,
+      tokenId,
+      ipfsHash: effectiveIpfsHash,
+      ipfsUrl: getIPFSGatewayURL(effectiveIpfsHash),
+      ipfsPending: effectiveIpfsHash.startsWith("PENDING_IPFS"),
+      author,
+      tribe: tribe || null,
+      language: language || null,
+      title: title || null,
+      description: description || null,
+      metadata: metadata || null,
+      createdAt: new Date().toISOString(),
+    }
+
+    logger.info(`Off-chain story created: token_id ${tokenId}`)
+    res.status(201).json({ success: true, story: created })
+  } catch (error) {
+    logger.error("Error creating off-chain story", error)
+    next(error)
+  }
+}
+

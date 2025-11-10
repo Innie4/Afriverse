@@ -20,7 +20,7 @@ import {
 import { SuccessAnimation, TransactionAnimation } from "@/components/lottie-animations"
 import { useWeb3 } from "@/hooks/useWeb3"
 import { motion, AnimatePresence } from "framer-motion"
-import { uploadFileToIPFS, uploadMetadataToIPFS } from "@/services/api"
+import { uploadFileToIPFS, uploadMetadataToIPFS, createStoryOffchain } from "@/services/api"
 import { toast } from "sonner"
 import { AFRICAN_TRIBES } from "@/data/tribes"
 import { AFRICAN_LANGUAGES } from "@/data/languages"
@@ -492,22 +492,58 @@ export default function StoryUploadForm() {
         expressionType: formData.expressionType,
       }
 
-      const metadataResult = await uploadMetadataToIPFS(metadata)
-      toast.success("Metadata uploaded to IPFS")
+      let metadataCid: string | null = null
+      try {
+        const metadataResult = await uploadMetadataToIPFS(metadata)
+        metadataCid = metadataResult.cid
+        toast.success("Metadata uploaded to IPFS")
+      } catch (ipfsError: any) {
+        const msg = ipfsError?.message || "IPFS upload failed"
+        toast.warning(`${msg}. Saving off-chain without IPFS.`)
+      }
 
-      setStep("minting")
-      setShowTransaction(true)
+      const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS || ""
+      const contractConfigured = /^0x[a-fA-F0-9]{40}$/.test(contractAddress)
 
-      const result = await mintStory(metadataResult.cid, formData.tribe, formData.language)
+      if (contractConfigured && isConnected && metadataCid) {
+        setStep("minting")
+        setShowTransaction(true)
 
-      if (result.success && result.txHash) {
-        setTxHash(result.txHash)
-        setTokenId(result.tokenId || null)
+        const result = await mintStory(metadataCid, formData.tribe, formData.language)
+
+        if (result.success && result.txHash) {
+          setTxHash(result.txHash)
+          setTokenId(result.tokenId != null ? String(result.tokenId) : null)
+          setStep("success")
+          setShowTransaction(false)
+          setSuccess(true)
+          toast.success("Creative work minted successfully!")
+        } else {
+          const errorMessage = result.error || "Failed to mint creative work"
+          setError(errorMessage)
+          toast.error(errorMessage)
+          setStep("form")
+          setShowTransaction(false)
+        }
+      } else {
+        // Bypass smart contract: store story off-chain
+        const offchain = await createStoryOffchain({
+          ipfsHash: metadataCid || `PENDING_IPFS_${Date.now()}`,
+          author: formData.author,
+          tribe: formData.tribe,
+          language: formData.language,
+          title: formData.title,
+          description: formData.description,
+          metadata,
+        })
+
+        setTokenId(String(offchain.story.tokenId))
         setStep("success")
         setShowTransaction(false)
         setSuccess(true)
-        toast.success("Creative work minted successfully!")
-
+        toast.success("Creative work saved off-chain")
+      }
+      
         setFormData({
           title: "",
           author: "",
@@ -527,13 +563,6 @@ export default function StoryUploadForm() {
           setSuccess(false)
           setStep("form")
         }, 5000)
-      } else {
-        const errorMessage = result.error || "Failed to mint creative work"
-        setError(errorMessage)
-        toast.error(errorMessage)
-        setStep("form")
-        setShowTransaction(false)
-      }
     } catch (submissionError: any) {
       const message = submissionError.message || "Failed to upload your creative work. Please try again."
       setError(message)
