@@ -9,7 +9,8 @@ import { readFileSync, existsSync } from "fs"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-dotenv.config({ path: join(__dirname, ".env") })
+// Load the backend/.env (one level up from scripts/)
+dotenv.config({ path: join(__dirname, "../.env") })
 
 console.log("🔍 Checking Afriverse Tales Backend Configuration...\n")
 

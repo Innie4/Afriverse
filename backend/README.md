@@ -6,6 +6,7 @@ Node.js backend API for Afriverse Tales - Web3 story indexer and IPFS manager.
 
 - 🚀 **Express.js REST API** with clean architecture
 - 📦 **IPFS Integration** via web3.storage for decentralized file storage
+- 📦 **IPFS Integration** via Web3.Storage with Pinata/NFT.Storage fallbacks
 - ⛓️ **Web3 Event Listener** using Ethers.js to listen for StoryMinted events
 - 🗄️ **PostgreSQL/Supabase** database for story metadata
 - 💾 **Redis Caching** (optional) for faster API responses
@@ -41,6 +42,8 @@ Edit `.env` and fill in your configuration:
 - `CONTRACT_ADDRESS` - Your smart contract address
 - `PRIVATE_KEY` - Private key for event listener (optional)
 - `WEB3_STORAGE_TOKEN` - Web3.storage API token
+- `PINATA_API_KEY` and `PINATA_SECRET_KEY` - Pinata API credentials (optional)
+- `NFT_STORAGE_TOKEN` - NFT.Storage API token (optional)
 - `REDIS_URL` - Redis connection string (optional)
 
 3. **Start the server:**
@@ -277,4 +280,15 @@ backend/
 ## License
 
 ISC
+## IPFS Provider Setup
+
+Set one or more of the following in `backend/.env`:
+- `WEB3_STORAGE_TOKEN` (recommended)
+- `PINATA_API_KEY` + `PINATA_SECRET_KEY` (fallback)
+- `NFT_STORAGE_TOKEN` (fallback)
+
+You can customize the gateway used to display IPFS content with:
+- `IPFS_GATEWAY_URL` (default `https://ipfs.io/ipfs/`)
+
+If no provider is configured, the server will start and log a warning. Upload endpoints will return errors until a provider is set.
 

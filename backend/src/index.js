@@ -3,6 +3,8 @@ import express from "express"
 import cors from "cors"
 import rateLimit from "express-rate-limit"
 import dotenv from "dotenv"
+import { fileURLToPath } from "url"
+import path from "path"
 import logger from "./config/logger.js"
 import { initDatabase, createTables } from "./config/database.js"
 import { initRedis } from "./config/cache.js"
@@ -10,8 +12,10 @@ import { initIPFS } from "./services/ipfs.js"
 import { initEventListener, startEventListener } from "./services/eventListener.js"
 import routes from "./routes/index.js"
 
-// Load environment variables
-dotenv.config()
+// Load environment variables explicitly from backend/.env regardless of cwd
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 const app = express()
 const PORT = process.env.PORT || 3001
