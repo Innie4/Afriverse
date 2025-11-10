@@ -12,11 +12,11 @@ export default function About() {
       <section className="flex-1 px-4 sm:px-6 lg:px-8 py-20 relative">
         <TribalPatternOverlay />
         <div className="max-w-4xl mx-auto relative z-10">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-balance">About Afriverse Tales</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-balance">About Afriverse</h1>
           
           <div className="prose prose-lg max-w-none space-y-6">
             <p className="text-lg text-muted-foreground">
-              Afriverse Tales is a Web3 platform dedicated to preserving and celebrating African stories through blockchain technology.
+              Afriverse is a Web3 platform dedicated to preserving and celebrating African stories through blockchain technology.
             </p>
 
             <h2 className="text-2xl font-bold mt-8 mb-4">Our Mission</h2>

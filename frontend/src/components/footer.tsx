@@ -14,8 +14,8 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src="/afriverse-logo.png" alt="Afriverse Tales" className="h-10 w-auto" />
-              <span className="font-bold text-lg text-primary">Afriverse Tales</span>
+              <img src="/afriverse-logo.png" alt="Afriverse" className="h-10 w-auto" />
+              <span className="font-bold text-lg text-primary">Afriverse</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Preserving Africa’s creative expressions on-chain—from stories and art to film, folklore, and music.
@@ -61,7 +61,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 Afriverse Tales. All rights reserved.</p>
+          <p>&copy; 2025 Afriverse. All rights reserved.</p>
         </div>
       </div>
     </footer>

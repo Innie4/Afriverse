@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Afriverse Tales color palette */
+  /* Afriverse color palette */
   /* Primary: Emerald Green - representing African heritage and growth */
   --primary: oklch(0.45 0.12 160);
   --primary-foreground: oklch(0.99 0 0);
