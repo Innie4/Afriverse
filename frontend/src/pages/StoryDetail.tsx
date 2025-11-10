@@ -107,7 +107,7 @@ export default function StoryDetail() {
   const rawImage = metadata.image || story.ipfsUrl
   const coverImage = typeof rawImage === "string" && rawImage.startsWith("ipfs://") ? rawImage.replace("ipfs://", gateway) : rawImage || "/placeholder.svg"
   const chapters = useMemo(() => (Array.isArray(metadata.chapters) ? metadata.chapters : []), [metadata.chapters])
-  const summary = metadata.summary || story.description || "A story from Afriverse Tales"
+  const summary = metadata.summary || story.description || "A story from Afriverse"
   const attributeArray = Array.isArray(metadata.attributes) ? metadata.attributes : []
   const attributeTags = attributeArray
     .filter((attr: any) => typeof attr?.value === "string" && (attr.trait_type === "Tags" || attr.trait_type === "Tag"))

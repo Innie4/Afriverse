@@ -30,9 +30,9 @@ export default function Home() {
   ]
 
   const stats = [
-    { label: "Stories Minted", value: "2,547", icon: BookOpen },
-    { label: "Active Storytellers", value: "1,389", icon: Users },
-    { label: "Cultural Heritage Preserved", value: "847", icon: Heart },
+    { label: "Projected Stories Minted (Year 1)", value: "500+", icon: BookOpen },
+    { label: "Creators on Our Waitlist", value: "1,200+", icon: Users },
+    { label: "Heritage Collections in Planning", value: "25", icon: Heart },
   ]
 
   const stories = [
@@ -104,7 +104,7 @@ export default function Home() {
             >
               <Sparkles size={16} className="text-primary" />
             </motion.div>
-            <span className="text-sm font-medium text-primary">Welcome to Afriverse Tales</span>
+            <span className="text-sm font-medium text-primary">Welcome to Afriverse</span>
           </motion.div>
 
           <motion.h1
@@ -148,7 +148,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <ParallaxHero imageSrc="/african-storytelling-nft-web3-heritage.jpg" alt="Afriverse Tales Hero" />
+            <ParallaxHero imageSrc="/african-storytelling-nft-web3-heritage.jpg" alt="Afriverse hero" />
           </motion.div>
         </motion.div>
       </section>
@@ -206,7 +206,7 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            Why Afriverse Tales?
+            Why Afriverse?
           </motion.h2>
 
           <motion.div
@@ -265,7 +265,7 @@ export default function Home() {
                 A Home for African Storytellers to Claim Their Cultural IP
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                Afriverse Tales empowers African storytellers to protect their intellectual property through blockchain
+                Afriverse empowers African storytellers to protect their intellectual property through blockchain
                 technology. Every story minted creates an immutable record of ownership, preserving cultural heritage for
                 generations to come.
               </p>

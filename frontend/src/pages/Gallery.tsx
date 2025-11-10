@@ -79,7 +79,7 @@ export default function Gallery() {
       metadata.expressionType ||
       metadata.attributes?.find((attr: any) => attr?.trait_type === "Expression Type")?.value ||
       metadata.category
-    const summary = metadata.summary || firstChapter?.contentText || story.description || "A story from Afriverse Tales"
+    const summary = metadata.summary || firstChapter?.contentText || story.description || "A story from Afriverse"
 
     return {
       id: story.tokenId,
