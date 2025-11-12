@@ -52,7 +52,7 @@ export default function Navbar() {
               className="order-2 md:order-1 ml-auto md:ml-0 flex items-center gap-3 group transition-transform"
             >
               <img
-                src="/afriverse-logo.png"
+                src="/real-logo.png"
                 alt="Afriverse logo"
                 className="h-10 w-auto transition-transform group-hover:scale-[1.03]"
               />
