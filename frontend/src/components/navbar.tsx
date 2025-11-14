@@ -100,21 +100,21 @@ export default function Navbar() {
                 <>
                   <Link
                     to="/profile"
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/60 hover:bg-muted/80 transition-all duration-300 ease-out hover:shadow-md"
+                    className="btn-lift flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/70 hover:bg-muted/80 transition-all duration-200"
                   >
                     <User size={18} />
                     <span className="text-sm font-medium">{user?.name || "Profile"}</span>
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/60 hover:bg-muted/80 transition-all duration-300 ease-out hover:shadow-md"
+                    className="btn-lift flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/70 hover:bg-muted/80 transition-all duration-200"
                   >
                     <LogOut size={18} />
                     <span className="text-sm font-medium">Logout</span>
                   </button>
                   <Link
                     to="/upload"
-                    className="px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-medium hover:bg-accent/90 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                    className="btn-lift px-6 py-2.5 gradient-accent text-accent-foreground rounded-xl font-medium shadow-organic transition-all duration-200"
                   >
                     Mint Work
                   </Link>
@@ -123,13 +123,13 @@ export default function Navbar() {
                 <>
                   <Link
                     to="/login"
-                    className="px-4 py-2.5 rounded-xl border border-border/60 hover:bg-muted/80 transition-all duration-300 ease-out hover:shadow-md text-sm font-medium"
+                    className="btn-lift px-4 py-2.5 rounded-xl border border-border/70 hover:bg-muted/80 transition-all duration-200 text-sm font-medium"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    className="px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-medium hover:bg-accent/90 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                    className="btn-lift px-6 py-2.5 gradient-accent text-accent-foreground rounded-xl font-medium shadow-organic transition-all duration-200"
                   >
                     Register
                   </Link>

@@ -157,13 +157,13 @@ export default function Home() {
           >
             <Link
               to="/upload"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 font-semibold text-primary-foreground shadow-lg transition-all duration-300 ease-out hover:scale-[1.03] hover:bg-primary/90 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
+              className="btn-lift inline-flex items-center justify-center gap-2 rounded-xl gradient-primary px-8 py-4 font-semibold text-primary-foreground shadow-organic transition-all duration-200 ease-out active:scale-[0.98]"
             >
               Start Minting <ArrowRight size={20} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               to="/gallery"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-border/60 bg-muted/50 backdrop-blur-sm px-8 py-4 font-semibold text-foreground transition-all duration-300 ease-out hover:scale-[1.03] hover:bg-muted/70 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]"
+              className="btn-lift inline-flex items-center justify-center gap-2 rounded-xl border-2 border-border/70 bg-card/80 backdrop-blur-sm px-8 py-4 font-semibold text-foreground transition-all duration-200 ease-out hover:border-primary/40 hover:bg-card active:scale-[0.98]"
             >
               Explore Gallery
             </Link>
@@ -188,15 +188,15 @@ export default function Home() {
                 <motion.div
                   key={idx}
                   variants={itemVariants}
-                  className="text-center p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 transition-all duration-300 ease-out"
+                  className="card-organic text-center p-8 group"
                 >
-                  <div className="flex justify-center mb-4">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center transition-all duration-300 ease-out group-hover:bg-primary/20 group-hover:scale-110">
+                  <div className="flex justify-center mb-5">
+                    <div className="w-18 h-18 rounded-2xl bg-primary/12 flex items-center justify-center transition-all duration-300 ease-out group-hover:bg-primary/20 group-hover:scale-110">
                       <Icon size={32} className="text-primary transition-transform duration-300 group-hover:scale-110" />
                     </div>
                   </div>
                   <motion.div
-                    className="text-4xl font-bold text-primary mb-2"
+                    className="text-4xl font-bold text-primary mb-3"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
@@ -204,7 +204,7 @@ export default function Home() {
                   >
                     {stat.value}
                   </motion.div>
-                  <p className="text-muted-foreground">{stat.label}</p>
+                  <p className="text-muted-foreground leading-relaxed">{stat.label}</p>
                 </motion.div>
               )
             })}
@@ -239,21 +239,21 @@ export default function Home() {
                 <motion.div
                   key={idx}
                   variants={itemVariants}
-                  className="p-8 rounded-2xl bg-background/80 backdrop-blur-sm border border-border/60 transition-all duration-300 ease-out group"
+                  className="card-organic p-8 group"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: feature.delay }}
                 >
                   <motion.div
-                    className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-5 transition-all duration-300 ease-out group-hover:bg-primary/20"
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="w-16 h-16 rounded-2xl bg-primary/12 flex items-center justify-center mb-6 transition-all duration-300 ease-out group-hover:bg-primary/20"
+                    whileHover={{ rotate: 5, scale: 1.1 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <Icon size={26} className="text-primary transition-transform duration-300" />
+                    <Icon size={28} className="text-primary transition-transform duration-300" />
                   </motion.div>
-                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors duration-300">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed text-[15px]">{feature.description}</p>
+                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors duration-300 leading-snug">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                 </motion.div>
               )
             })}

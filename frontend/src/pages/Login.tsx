@@ -68,9 +68,9 @@ export default function Login() {
       
       <div className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
         <div className="w-full max-w-md">
-          <div className="bg-card/95 backdrop-blur-sm border border-border/60 rounded-2xl p-8 shadow-xl">
-            <h1 className="text-3xl font-bold mb-2 text-foreground">Welcome Back</h1>
-            <p className="text-muted-foreground mb-6">Sign in to your account to continue</p>
+          <div className="card-organic p-8 md:p-10">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">Welcome Back</h1>
+            <p className="text-muted-foreground mb-8 leading-relaxed">Sign in to your account to continue</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -88,8 +88,8 @@ export default function Login() {
                       if (errors.email) setErrors({ ...errors, email: undefined })
                     }}
                     placeholder="your.email@example.com"
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 ${
-                      errors.email ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+                    className={`w-full pl-11 pr-4 py-3 rounded-xl border-[1.5px] bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      errors.email ? "border-destructive focus:ring-destructive" : "border-border/70 focus:ring-primary/30"
                     }`}
                   />
                 </div>
@@ -111,8 +111,8 @@ export default function Login() {
                       if (errors.password) setErrors({ ...errors, password: undefined })
                     }}
                     placeholder="Enter your password"
-                    className={`w-full pl-10 pr-12 py-2.5 rounded-xl border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 ${
-                      errors.password ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+                    className={`w-full pl-11 pr-12 py-3 rounded-xl border-[1.5px] bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      errors.password ? "border-destructive focus:ring-destructive" : "border-border/70 focus:ring-primary/30"
                     }`}
                   />
                   <button
@@ -130,7 +130,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-lift w-full py-3 gradient-primary text-primary-foreground rounded-xl font-semibold shadow-organic disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </button>
