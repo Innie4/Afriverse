@@ -117,12 +117,12 @@ export default function Gallery() {
                 placeholder="Search stories, authors..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-border/60 bg-background/80 backdrop-blur-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 ease-out"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl border-2 border-border/60 hover:bg-muted/80 transition-all duration-300 ease-out flex items-center gap-2 hover:shadow-md hover:scale-105 active:scale-95"
             >
               <Filter size={20} />
               <span className="hidden sm:inline">Filters</span>
@@ -151,10 +151,10 @@ export default function Gallery() {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
+                    className={`px-4 py-2.5 rounded-xl transition-all duration-300 ease-out ${
                       selectedCategory === cat
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background border border-border hover:border-primary"
+                        ? "bg-primary text-primary-foreground shadow-md scale-105"
+                        : "bg-background/80 border-2 border-border/60 hover:border-primary/50 hover:bg-muted/50 hover:scale-105 active:scale-95"
                     }`}
                   >
                     {cat}
@@ -171,10 +171,10 @@ export default function Gallery() {
                   <button
                     key={option}
                     onClick={() => setSortBy(option)}
-                    className={`px-4 py-2 rounded-lg transition-colors capitalize ${
+                    className={`px-4 py-2.5 rounded-xl transition-all duration-300 ease-out capitalize ${
                       sortBy === option
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background border border-border hover:border-primary"
+                        ? "bg-primary text-primary-foreground shadow-md scale-105"
+                        : "bg-background/80 border-2 border-border/60 hover:border-primary/50 hover:bg-muted/50 hover:scale-105 active:scale-95"
                     }`}
                   >
                     {option}

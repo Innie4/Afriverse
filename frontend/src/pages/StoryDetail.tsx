@@ -147,14 +147,14 @@ export default function StoryDetail() {
       <section className="flex-1 px-4 sm:px-6 lg:px-8 py-12 -mt-32 relative z-10">
         <div className="max-w-3xl mx-auto">
           {/* Header Card */}
-          <div className="bg-card border border-border rounded-xl p-8 mb-8 shadow-lg">
+          <div className="bg-card/95 backdrop-blur-sm border border-border/60 rounded-2xl p-8 mb-8 shadow-xl">
             {/* Badges */}
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold text-primary">
+              <span className="inline-flex items-center rounded-full bg-primary/15 px-4 py-1.5 text-xs font-semibold text-primary shadow-sm">
                 {expressionAttr}
               </span>
               {story.tribe && (
-                <span className="inline-flex items-center rounded-full bg-muted px-4 py-1 text-xs font-semibold text-muted-foreground">
+                <span className="inline-flex items-center rounded-full bg-muted/80 px-4 py-1.5 text-xs font-semibold text-muted-foreground shadow-sm">
                   {story.tribe}
                 </span>
               )}
@@ -192,9 +192,9 @@ export default function StoryDetail() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  isLiked ? "bg-destructive/10 text-destructive" : "bg-muted hover:bg-muted/80 text-foreground"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 ease-out ${
+                  isLiked ? "bg-destructive/15 text-destructive shadow-sm" : "bg-muted/80 hover:bg-muted text-foreground hover:shadow-md"
+                } hover:scale-105 active:scale-95`}
               >
                 <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
                 <span>{likeCount}</span>
@@ -202,9 +202,9 @@ export default function StoryDetail() {
 
               <button
                 onClick={handleBookmark}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  isBookmarked ? "bg-primary/10 text-primary" : "bg-muted hover:bg-muted/80 text-foreground"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 ease-out ${
+                  isBookmarked ? "bg-primary/15 text-primary shadow-sm" : "bg-muted/80 hover:bg-muted text-foreground hover:shadow-md"
+                } hover:scale-105 active:scale-95`}
               >
                 <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
                 <span>{isBookmarked ? "Saved" : "Save"}</span>
@@ -213,7 +213,7 @@ export default function StoryDetail() {
               <div className="relative">
                 <button
                   onClick={() => setShowShareMenu(!showShareMenu)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/80 hover:bg-muted text-foreground transition-all duration-300 ease-out hover:shadow-md hover:scale-105 active:scale-95"
                 >
                   <Share2 size={20} />
                   <span>Share</span>
@@ -295,7 +295,7 @@ export default function StoryDetail() {
                   <Link
                     key={tag + index}
                     to={`/gallery?search=${tag}`}
-                    className="px-4 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
+                    className="px-4 py-2 rounded-full bg-primary/15 text-primary hover:bg-primary/25 transition-all duration-300 ease-out text-sm font-medium hover:scale-105 active:scale-95 shadow-sm"
                   >
                     #{tag}
                   </Link>

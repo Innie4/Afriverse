@@ -32,31 +32,31 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+      <nav className="sticky top-0 z-50 bg-background/98 backdrop-blur-md border-b border-border/60 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-3 sm:gap-4">
             {/* Mobile Menu Button */}
             <button
-              className="order-1 md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+              className="order-1 md:hidden p-2.5 hover:bg-muted/80 rounded-xl transition-all duration-300 ease-out active:scale-95"
               onClick={toggleMenu}
               aria-expanded={isOpen}
               aria-controls="mobile-navigation"
               aria-label="Toggle navigation menu"
             >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+              {isOpen ? <X size={24} className="transition-transform duration-300" /> : <Menu size={24} className="transition-transform duration-300" />}
             </button>
 
             {/* Logo */}
             <Link
               to="/"
-              className="order-2 md:order-1 ml-auto md:ml-0 flex items-center gap-3 group transition-transform"
+              className="order-2 md:order-1 ml-auto md:ml-0 flex items-center gap-3 group transition-all duration-300 ease-out"
             >
               <img
                 src="/real-logo.png"
                 alt="Afriverse logo"
-                className="h-10 w-auto transition-transform group-hover:scale-[1.03]"
+                className="h-10 w-auto transition-all duration-300 ease-out group-hover:scale-[1.05] group-hover:rotate-1"
               />
-              <span className="font-bold text-base sm:text-lg text-primary transition-colors group-hover:text-primary/80">
+              <span className="font-bold text-base sm:text-lg text-primary transition-all duration-300 ease-out group-hover:text-primary/90 group-hover:tracking-wide">
                 Afriverse
               </span>
             </Link>
@@ -67,9 +67,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className="text-foreground hover:text-primary transition-colors text-sm font-medium"
+                  className="text-foreground hover:text-primary transition-all duration-300 ease-out text-sm font-medium relative group/link"
                 >
                   {link.label}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 ease-out group-hover/link:w-full"></span>
                 </Link>
               ))}
             </div>
@@ -78,7 +79,7 @@ export default function Navbar() {
             <div className="order-5 md:order-3 hidden md:block md:ml-6">
               <Link
                 to="/upload"
-                className="px-6 py-2 bg-accent text-accent-foreground rounded-lg font-medium hover:bg-accent/90 transition-colors"
+                className="px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-medium hover:bg-accent/90 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
               >
                 Mint Work
               </Link>
@@ -94,10 +95,10 @@ export default function Navbar() {
         }`}
         aria-hidden={!isOpen}
       >
-        <div className="absolute inset-0 bg-black/40" onClick={closeMenu} />
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeMenu} />
         <div
           id="mobile-navigation"
-          className={`absolute inset-y-0 left-0 w-1/2 max-w-xs bg-background border-r border-border shadow-xl overflow-hidden transition-all duration-300 ease-out ${
+          className={`absolute inset-y-0 left-0 w-1/2 max-w-xs bg-background/98 backdrop-blur-md border-r border-border/60 shadow-2xl overflow-hidden transition-all duration-300 ease-out ${
             isOpen ? "[clip-path:inset(0_0_0_0)]" : "[clip-path:inset(0_100%_0_0)]"
           }`}
           onClick={(event) => event.stopPropagation()}
@@ -107,7 +108,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 to={link.href}
-                className={`block px-3 py-2 rounded-lg text-foreground transition-all duration-300 ease-out hover:bg-muted transform ${
+                className={`block px-4 py-3 rounded-xl text-foreground transition-all duration-300 ease-out hover:bg-muted/80 hover:translate-x-1 transform ${
                   isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
                 }`}
                 style={{ transitionDelay: `${index * 60}ms` }}
@@ -118,7 +119,7 @@ export default function Navbar() {
             ))}
             <Link
               to="/upload"
-              className={`block px-3 py-3 bg-accent text-accent-foreground rounded-lg font-medium transition-all duration-300 ease-out hover:bg-accent/90 hover:shadow-md transform ${
+              className={`block px-4 py-3 bg-accent text-accent-foreground rounded-xl font-medium transition-all duration-300 ease-out hover:bg-accent/90 hover:shadow-lg hover:scale-[1.02] transform ${
                 isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
               }`}
               style={{ transitionDelay: `${links.length * 60}ms` }}

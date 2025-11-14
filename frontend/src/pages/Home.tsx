@@ -129,13 +129,13 @@ export default function Home() {
           >
             <Link
               to="/upload"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 font-semibold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-xl"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 font-semibold text-primary-foreground shadow-lg transition-all duration-300 ease-out hover:scale-[1.03] hover:bg-primary/90 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
             >
-              Start Minting <ArrowRight size={20} />
+              Start Minting <ArrowRight size={20} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               to="/gallery"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-muted px-8 py-4 font-semibold text-foreground transition-all hover:scale-[1.02] hover:bg-muted/80"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-border/60 bg-muted/50 backdrop-blur-sm px-8 py-4 font-semibold text-foreground transition-all duration-300 ease-out hover:scale-[1.03] hover:bg-muted/70 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]"
             >
               Explore Gallery
             </Link>
@@ -170,12 +170,12 @@ export default function Home() {
                 <motion.div
                   key={idx}
                   variants={itemVariants}
-                  className="text-center p-6 rounded-xl bg-background/50 backdrop-blur-sm border border-border hover:border-primary/50 transition-all hover:shadow-lg"
-                  whileHover={{ y: -5 }}
+                  className="text-center p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 hover:border-primary/40 transition-all duration-300 ease-out hover:shadow-xl"
+                  whileHover={{ y: -8, scale: 1.02 }}
                 >
                   <div className="flex justify-center mb-4">
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Icon size={32} className="text-primary" />
+                    <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center transition-all duration-300 ease-out group-hover:bg-primary/20 group-hover:scale-110">
+                      <Icon size={32} className="text-primary transition-transform duration-300 group-hover:scale-110" />
                     </div>
                   </div>
                   <motion.div
@@ -222,22 +222,22 @@ export default function Home() {
                 <motion.div
                   key={idx}
                   variants={itemVariants}
-                  className="p-8 rounded-xl bg-background border border-border hover:border-primary/50 transition-all hover:shadow-lg group"
-                  whileHover={{ y: -5 }}
+                  className="p-8 rounded-2xl bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 transition-all duration-300 ease-out hover:shadow-xl group"
+                  whileHover={{ y: -8, scale: 1.01 }}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: feature.delay }}
                 >
                   <motion.div
-                    className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
+                    className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-5 transition-all duration-300 ease-out group-hover:bg-primary/20"
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
                   >
-                    <Icon size={24} className="text-primary" />
+                    <Icon size={26} className="text-primary transition-transform duration-300" />
                   </motion.div>
-                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors duration-300">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed text-[15px]">{feature.description}</p>
                 </motion.div>
               )
             })}
@@ -307,9 +307,9 @@ export default function Home() {
             </motion.div>
             <motion.div
               variants={itemVariants}
-              className="rounded-xl overflow-hidden bg-muted h-96 sm:h-[500px] relative shadow-2xl"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
+              className="rounded-2xl overflow-hidden bg-muted h-96 sm:h-[500px] relative shadow-2xl"
+              whileHover={{ scale: 1.03, rotate: 0.5 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
               <img
                 src="/african-heritage-culture-art.jpg"
@@ -357,22 +357,22 @@ export default function Home() {
                 transition={{ duration: 0.2 }}
               >
                 <Link to={`/story/${story.id}`} className="group cursor-pointer block">
-                  <div className="relative h-64 rounded-xl overflow-hidden mb-4 bg-muted shadow-md">
+                  <div className="relative h-64 rounded-2xl overflow-hidden mb-5 bg-muted shadow-lg">
                     <motion.img
                       src={story.image || "/placeholder.svg"}
                       alt={story.title}
                       className="w-full h-full object-cover"
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.3 }}
+                      whileHover={{ scale: 1.15 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{story.title}</h3>
+                      <h3 className="font-bold text-lg group-hover:text-primary transition-all duration-300 ease-out group-hover:tracking-wide">{story.title}</h3>
                     </div>
                     <p className="text-sm text-muted-foreground">by {story.author}</p>
-                    <span className="inline-block text-xs px-3 py-1 bg-primary/10 text-primary rounded-full">
+                    <span className="inline-block text-xs px-3.5 py-1.5 bg-primary/15 text-primary rounded-full font-medium shadow-sm">
                       {story.category}
                     </span>
                   </div>
@@ -416,9 +416,9 @@ export default function Home() {
           >
             <Link
               to="/upload"
-              className="inline-flex px-8 py-4 bg-accent text-accent-foreground rounded-lg font-semibold hover:bg-accent/90 transition-all items-center gap-2 shadow-lg hover:shadow-xl"
+              className="inline-flex px-8 py-4 bg-accent text-accent-foreground rounded-xl font-semibold hover:bg-accent/90 transition-all duration-300 ease-out items-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.05] hover:-translate-y-1 active:scale-[0.98]"
             >
-              Mint Your First Story <ArrowRight size={20} />
+              Mint Your First Story <ArrowRight size={20} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </motion.div>
         </div>
