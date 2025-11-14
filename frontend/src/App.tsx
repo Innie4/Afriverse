@@ -25,6 +25,8 @@ function App() {
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/upload" element={<Upload />} />
               <Route path="/story/:id" element={<StoryDetail />} />
+              <Route path="/story/:id/intro" element={<StoryDetail />} />
+              <Route path="/story/:id/chapter/:chapterId" element={<StoryDetail />} />
               <Route path="/my-stories" element={<MyStories />} />
               <Route path="/documentation" element={<Documentation />} />
               <Route path="/blog" element={<Blog />} />

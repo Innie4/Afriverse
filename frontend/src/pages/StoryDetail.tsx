@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react"
-import { useParams, Link, useNavigate } from "react-router-dom"
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom"
 import StoryCard from "@/components/story-card"
 import { Heart, Share2, Bookmark, Eye, Calendar, User } from "lucide-react"
 import Footer from "@/components/footer"
 import Navbar from "@/components/navbar"
+import ChapterSidebar from "@/components/chapter-sidebar"
 import { fetchStoryById, fetchStories, type Story } from "@/services/api"
 import { StoryDetailSkeleton } from "@/components/skeleton"
 import { toast } from "sonner"
@@ -13,8 +14,19 @@ import { marked } from "marked"
 const stripHtmlText = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 
 export default function StoryDetail() {
-  const { id } = useParams<{ id: string }>()
+  const { id, chapterId } = useParams<{ id: string; chapterId?: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  
+  // Determine if we're on intro page
+  const isIntroPage = location.pathname.endsWith("/intro") || (!chapterId && !location.pathname.includes("/chapter/"))
+  
+  // Redirect /story/:id to /story/:id/intro if no chapter specified
+  useEffect(() => {
+    if (id && !chapterId && !location.pathname.endsWith("/intro") && !location.pathname.includes("/chapter/")) {
+      navigate(`/story/${id}/intro`, { replace: true })
+    }
+  }, [id, chapterId, location.pathname, navigate])
   const [story, setStory] = useState<Story | null>(null)
   const [relatedStories, setRelatedStories] = useState<Story[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -106,10 +118,6 @@ export default function StoryDetail() {
   )
   const metadataTags = Array.isArray(metadata.tags) ? metadata.tags : []
   const tags = useMemo(() => Array.from(new Set([...metadataTags, ...attributeTags].filter(Boolean))), [metadataTags, attributeTags])
-  const expressionAttr = useMemo(() =>
-    metadata.expressionType || attributeArray.find((attr: any) => attr?.trait_type === "Expression Type")?.value || "Creative Work",
-    [metadata.expressionType, attributeArray]
-  )
 
   if (isLoading) {
     return (
@@ -158,20 +166,31 @@ export default function StoryDetail() {
 
       {/* Main Content */}
       <section className="flex-1 px-4 sm:px-6 lg:px-8 py-12 -mt-32 relative z-10">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-6xl mx-auto flex gap-8">
+          {/* Chapter Sidebar */}
+          {chapters.length > 0 && (
+            <ChapterSidebar
+              chapters={chapters.map((ch: any) => ({ id: ch.id || "", title: ch.title || "" }))}
+              summary={summary}
+              storyId={id || ""}
+              currentChapter={isIntroPage ? "intro" : chapterId}
+            />
+          )}
+          
+          <div className="flex-1 max-w-3xl">
           {/* Header Card */}
           <div className="bg-card/95 backdrop-blur-sm border border-border/60 rounded-2xl p-8 mb-8 shadow-xl">
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className="inline-flex items-center rounded-full bg-primary/15 px-4 py-1.5 text-xs font-semibold text-primary shadow-sm">
-                {expressionAttr}
-              </span>
-              {story.tribe && (
-                <span className="inline-flex items-center rounded-full bg-muted/80 px-4 py-1.5 text-xs font-semibold text-muted-foreground shadow-sm">
-                  {story.tribe}
-                </span>
-              )}
-            </div>
+            {/* Single Tag Badge */}
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                <Link
+                  to={`/gallery?search=${encodeURIComponent(tags[0])}`}
+                  className="inline-flex items-center rounded-full bg-primary/15 px-4 py-1.5 text-xs font-semibold text-primary shadow-sm hover:bg-primary/25 transition-all duration-300 ease-out hover:scale-105 active:scale-95"
+                >
+                  {tags[0]}
+                </Link>
+              </div>
+            )}
 
             {/* Title */}
             <h1 className="text-4xl sm:text-5xl font-bold mb-6 text-foreground text-balance">
@@ -260,31 +279,47 @@ export default function StoryDetail() {
 
           {/* Story Content */}
           <div className="prose prose-invert max-w-none mb-12">
-            <p className="text-lg text-muted-foreground mb-8 italic">{summary}</p>
-
-            {chapters.length > 0 ? (
-              <div className="space-y-10">
-                {chapters.map((chapter: any, index: number) => {
-                  const markdownSource = chapter?.contentMarkdown || ""
-                  const generatedHtml = chapter?.contentHtml || (marked.parse(markdownSource) as string) || ""
-                  const safeHtml = DOMPurify.sanitize(generatedHtml)
-                  const plainText = chapter?.contentText || stripHtmlText(safeHtml)
-                  return (
-                    <article key={chapter?.id ?? index} className="space-y-3">
-                      <h2 className="text-2xl font-semibold text-foreground">
-                        {chapter?.title || `Chapter ${index + 1}`}
-                      </h2>
-                      <div
-                        className="prose prose-invert max-w-none text-foreground"
-                        dangerouslySetInnerHTML={{ __html: safeHtml }}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        {plainText.length} characters • Section {index + 1} of {chapters.length}
-                      </p>
-                    </article>
-                  )
-                })}
+            {isIntroPage ? (
+              <div>
+                <h2 className="text-3xl font-bold mb-6 text-foreground">Introduction</h2>
+                <p className="text-lg text-muted-foreground mb-8 italic leading-relaxed">{summary}</p>
               </div>
+            ) : chapterId ? (
+              (() => {
+                const chapter = chapters.find((ch: any) => ch.id === chapterId)
+                if (!chapter) {
+                  return (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground mb-4">Chapter not found</p>
+                      <Link
+                        to={`/story/${id}/intro`}
+                        className="text-primary hover:underline"
+                      >
+                        Return to Introduction
+                      </Link>
+                    </div>
+                  )
+                }
+                const markdownSource = chapter?.contentMarkdown || ""
+                const generatedHtml = chapter?.contentHtml || (marked.parse(markdownSource) as string) || ""
+                const safeHtml = DOMPurify.sanitize(generatedHtml)
+                const plainText = chapter?.contentText || stripHtmlText(safeHtml)
+                const chapterIndex = chapters.findIndex((ch: any) => ch.id === chapterId)
+                return (
+                  <article className="space-y-3">
+                    <h2 className="text-3xl font-bold text-foreground mb-6">
+                      {chapter?.title || `Chapter ${chapterIndex + 1}`}
+                    </h2>
+                    <div
+                      className="prose prose-invert max-w-none text-foreground"
+                      dangerouslySetInnerHTML={{ __html: safeHtml }}
+                    />
+                    <p className="text-xs text-muted-foreground mt-6">
+                      {plainText.length} characters • Chapter {chapterIndex + 1} of {chapters.length}
+                    </p>
+                  </article>
+                )
+              })()
             ) : (
               <div className="space-y-6 text-foreground leading-relaxed">
                 {(metadata.content as string | undefined)?.split(/\n{2,}/)
@@ -300,14 +335,14 @@ export default function StoryDetail() {
           </div>
 
           {/* Tags */}
-          {tags.length > 0 && (
+          {tags.length > 1 && (
             <div className="mb-12 pb-12 border-b border-border">
               <h3 className="font-semibold mb-4">Tags</h3>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag: string, index: number) => (
+                {tags.slice(1).map((tag: string, index: number) => (
                   <Link
                     key={tag + index}
-                    to={`/gallery?search=${tag}`}
+                    to={`/gallery?search=${encodeURIComponent(tag)}`}
                     className="px-4 py-2 rounded-full bg-primary/15 text-primary hover:bg-primary/25 transition-all duration-300 ease-out text-sm font-medium hover:scale-105 active:scale-95 shadow-sm"
                   >
                     #{tag}
@@ -316,6 +351,7 @@ export default function StoryDetail() {
               </div>
             </div>
           )}
+          </div>
         </div>
       </section>
 

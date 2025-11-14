@@ -319,6 +319,183 @@ Ama felt a deep sense of purpose settle over her. The heritage of the Ashanti pe
         }
       ]
     }
+  },
+  {
+    tokenId: 1004,
+    title: "The Baobab's Wisdom",
+    author: "0xAmina9876543210fedcba",
+    tribe: "Folklore",
+    language: "Swahili",
+    description: "An ancient tale passed down through generations about the wise baobab tree and the lessons it teaches.",
+    image: "/african-ancestral-traditions.jpg",
+    category: "Folklore",
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    metadata: {
+      name: "The Baobab's Wisdom",
+      summary: "In the vast savannah, where the sun beats down and the earth thirsts for rain, stands the baobab tree—a guardian of time, a keeper of secrets, and a teacher of wisdom.",
+      expressionType: "Folklore",
+      tags: ["Baobab", "Wisdom", "Ancestors", "Savannah", "Tradition"],
+      attributes: [
+        { trait_type: "Expression Type", value: "Folklore" },
+        { trait_type: "Region", value: "East Africa" },
+        { trait_type: "Tags", value: "Baobab,Wisdom,Ancestors,Savannah,Tradition" }
+      ],
+      chapters: [
+        {
+          id: "ch1",
+          title: "Chapter 1: The Ancient Tree",
+          contentMarkdown: `# The Ancient Tree
+
+In the heart of the savannah, where the horizon stretches endlessly and the sky meets the earth in a perfect line, there stood a baobab tree so old that no one could remember when it first took root. Its trunk was massive, wide enough for ten people to stand around, and its branches reached toward the heavens like gnarled fingers grasping for the stars.
+
+The villagers called it Mzee Mti—the Elder Tree—and they believed it held the wisdom of all the ancestors who had come before. Children were told never to harm it, for it was sacred. Elders would gather beneath its shade to tell stories, make decisions, and pass down the knowledge that had been entrusted to them.
+
+One day, a young girl named Zawadi came to the tree. She was troubled, her heart heavy with questions about her place in the world, about the meaning of her life, about the path she should take. She sat beneath the baobab, her back against its ancient bark, and closed her eyes.
+
+"Great tree," she whispered, "I need your wisdom. I am lost, and I don't know which way to turn."
+
+The wind rustled through the leaves, and Zawadi felt as if the tree itself was speaking to her, its voice carried on the breeze. "Child," it seemed to say, "wisdom is not given—it is earned. Look around you, and you will find the answers you seek."`,
+          contentHtml: `<h1>The Ancient Tree</h1>
+<p>In the heart of the savannah, where the horizon stretches endlessly and the sky meets the earth in a perfect line, there stood a baobab tree so old that no one could remember when it first took root. Its trunk was massive, wide enough for ten people to stand around, and its branches reached toward the heavens like gnarled fingers grasping for the stars.</p>
+<p>The villagers called it Mzee Mti—the Elder Tree—and they believed it held the wisdom of all the ancestors who had come before. Children were told never to harm it, for it was sacred. Elders would gather beneath its shade to tell stories, make decisions, and pass down the knowledge that had been entrusted to them.</p>
+<p>One day, a young girl named Zawadi came to the tree. She was troubled, her heart heavy with questions about her place in the world, about the meaning of her life, about the path she should take. She sat beneath the baobab, her back against its ancient bark, and closed her eyes.</p>
+<p>"Great tree," she whispered, "I need your wisdom. I am lost, and I don't know which way to turn."</p>
+<p>The wind rustled through the leaves, and Zawadi felt as if the tree itself was speaking to her, its voice carried on the breeze. "Child," it seemed to say, "wisdom is not given—it is earned. Look around you, and you will find the answers you seek."</p>`,
+          contentText: "In the heart of the savannah, where the horizon stretches endlessly and the sky meets the earth in a perfect line, there stood a baobab tree so old that no one could remember when it first took root. Its trunk was massive, wide enough for ten people to stand around, and its branches reached toward the heavens like gnarled fingers grasping for the stars. The villagers called it Mzee Mti—the Elder Tree—and they believed it held the wisdom of all the ancestors who had come before. Children were told never to harm it, for it was sacred. Elders would gather beneath its shade to tell stories, make decisions, and pass down the knowledge that had been entrusted to them. One day, a young girl named Zawadi came to the tree. She was troubled, her heart heavy with questions about her place in the world, about the meaning of her life, about the path she should take. She sat beneath the baobab, her back against its ancient bark, and closed her eyes. Great tree, she whispered, I need your wisdom. I am lost, and I don't know which way to turn. The wind rustled through the leaves, and Zawadi felt as if the tree itself was speaking to her, its voice carried on the breeze. Child, it seemed to say, wisdom is not given—it is earned. Look around you, and you will find the answers you seek."
+        },
+        {
+          id: "ch2",
+          title: "Chapter 2: The Lessons",
+          contentMarkdown: `# The Lessons
+
+Zawadi opened her eyes and looked around. She saw the ants marching in a line, each one carrying a burden many times its own weight, working together for the good of the colony. She saw the birds building nests, carefully selecting each twig, each piece of grass, creating a home for their young.
+
+She saw the elders sitting in a circle, their faces lined with age and experience, their hands gesturing as they spoke. They were discussing the village's problems, listening to each other, finding solutions together.
+
+And she saw the children playing, their laughter ringing through the air, their joy infectious and pure. They were learning, growing, becoming who they were meant to be.
+
+As she watched, Zawadi began to understand. The wisdom she sought wasn't hidden in the tree—it was all around her, in the way the ants worked together, in the way the birds built their nests, in the way the elders shared their knowledge, in the way the children played and learned.
+
+The baobab tree had been right. Wisdom wasn't something you received—it was something you discovered by paying attention, by observing, by learning from everything and everyone around you.`,
+          contentHtml: `<h1>The Lessons</h1>
+<p>Zawadi opened her eyes and looked around. She saw the ants marching in a line, each one carrying a burden many times its own weight, working together for the good of the colony. She saw the birds building nests, carefully selecting each twig, each piece of grass, creating a home for their young.</p>
+<p>She saw the elders sitting in a circle, their faces lined with age and experience, their hands gesturing as they spoke. They were discussing the village's problems, listening to each other, finding solutions together.</p>
+<p>And she saw the children playing, their laughter ringing through the air, their joy infectious and pure. They were learning, growing, becoming who they were meant to be.</p>
+<p>As she watched, Zawadi began to understand. The wisdom she sought wasn't hidden in the tree—it was all around her, in the way the ants worked together, in the way the birds built their nests, in the way the elders shared their knowledge, in the way the children played and learned.</p>
+<p>The baobab tree had been right. Wisdom wasn't something you received—it was something you discovered by paying attention, by observing, by learning from everything and everyone around you.</p>`,
+          contentText: "Zawadi opened her eyes and looked around. She saw the ants marching in a line, each one carrying a burden many times its own weight, working together for the good of the colony. She saw the birds building nests, carefully selecting each twig, each piece of grass, creating a home for their young. She saw the elders sitting in a circle, their faces lined with age and experience, their hands gesturing as they spoke. They were discussing the village's problems, listening to each other, finding solutions together. And she saw the children playing, their laughter ringing through the air, their joy infectious and pure. They were learning, growing, becoming who they were meant to be. As she watched, Zawadi began to understand. The wisdom she sought wasn't hidden in the tree—it was all around her, in the way the ants worked together, in the way the birds built their nests, in the way the elders shared their knowledge, in the way the children played and learned. The baobab tree had been right. Wisdom wasn't something you received—it was something you discovered by paying attention, by observing, by learning from everything and everyone around you."
+        },
+        {
+          id: "ch3",
+          title: "Chapter 3: The Understanding",
+          contentMarkdown: `# The Understanding
+
+From that day forward, Zawadi became a seeker of wisdom. She spent her days observing, learning, asking questions, and listening. She learned from the elders, from the children, from the animals, from the land itself.
+
+She discovered that wisdom wasn't a destination—it was a journey. It wasn't something you possessed—it was something you practiced. And most importantly, she learned that the greatest wisdom came from understanding that you would never know everything, but that was okay, because the joy was in the learning itself.
+
+Years passed, and Zawadi grew into a wise woman. She became an elder herself, and she would sit beneath the baobab tree, sharing stories with the next generation, passing down the wisdom she had gathered throughout her life.
+
+And when young people came to her with questions, she would tell them what the baobab had taught her: "Look around you. The answers are everywhere. You just need to learn how to see them."
+
+The baobab tree still stands in the savannah, its branches reaching toward the sky, its roots deep in the earth, a symbol of the wisdom that comes from patience, from observation, from the understanding that the greatest lessons are often the simplest ones, hidden in plain sight for those who know how to look.`,
+          contentHtml: `<h1>The Understanding</h1>
+<p>From that day forward, Zawadi became a seeker of wisdom. She spent her days observing, learning, asking questions, and listening. She learned from the elders, from the children, from the animals, from the land itself.</p>
+<p>She discovered that wisdom wasn't a destination—it was a journey. It wasn't something you possessed—it was something you practiced. And most importantly, she learned that the greatest wisdom came from understanding that you would never know everything, but that was okay, because the joy was in the learning itself.</p>
+<p>Years passed, and Zawadi grew into a wise woman. She became an elder herself, and she would sit beneath the baobab tree, sharing stories with the next generation, passing down the wisdom she had gathered throughout her life.</p>
+<p>And when young people came to her with questions, she would tell them what the baobab had taught her: "Look around you. The answers are everywhere. You just need to learn how to see them."</p>
+<p>The baobab tree still stands in the savannah, its branches reaching toward the sky, its roots deep in the earth, a symbol of the wisdom that comes from patience, from observation, from the understanding that the greatest lessons are often the simplest ones, hidden in plain sight for those who know how to look.</p>`,
+          contentText: "From that day forward, Zawadi became a seeker of wisdom. She spent her days observing, learning, asking questions, and listening. She learned from the elders, from the children, from the animals, from the land itself. She discovered that wisdom wasn't a destination—it was a journey. It wasn't something you possessed—it was something you practiced. And most importantly, she learned that the greatest wisdom came from understanding that you would never know everything, but that was okay, because the joy was in the learning itself. Years passed, and Zawadi grew into a wise woman. She became an elder herself, and she would sit beneath the baobab tree, sharing stories with the next generation, passing down the wisdom she had gathered throughout her life. And when young people came to her with questions, she would tell them what the baobab had taught her: Look around you. The answers are everywhere. You just need to learn how to see them. The baobab tree still stands in the savannah, its branches reaching toward the sky, its roots deep in the earth, a symbol of the wisdom that comes from patience, from observation, from the understanding that the greatest lessons are often the simplest ones, hidden in plain sight for those who know how to look."
+        }
+      ]
+    }
+  },
+  {
+    tokenId: 1005,
+    title: "Drumbeats of Freedom",
+    author: "0xJabariabcdef1234567890",
+    tribe: "Historical",
+    language: "English",
+    description: "A powerful narrative of resistance, resilience, and the unbreakable spirit of a people fighting for freedom.",
+    image: "/african-activism-history.jpg",
+    category: "Historical",
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    metadata: {
+      name: "Drumbeats of Freedom",
+      summary: "In the darkest hours of oppression, when hope seemed lost and freedom felt like a distant dream, the drums began to beat. They carried messages across mountains and valleys, through forests and across rivers, uniting a people in their quest for liberation.",
+      expressionType: "Historical",
+      tags: ["Freedom", "Resistance", "Liberation", "Unity", "Courage"],
+      attributes: [
+        { trait_type: "Expression Type", value: "Historical" },
+        { trait_type: "Region", value: "Pan-African" },
+        { trait_type: "Tags", value: "Freedom,Resistance,Liberation,Unity,Courage" }
+      ],
+      chapters: [
+        {
+          id: "ch1",
+          title: "Chapter 1: The Call",
+          contentMarkdown: `# The Call
+
+The drums started at dawn, their rhythm cutting through the morning mist like a blade. In the village, people stopped what they were doing and listened. The message was clear, though no words were spoken—only the beat, the pulse, the call to action.
+
+Kofi, a young man who had grown up hearing stories of freedom fighters, felt his heart quicken. He knew what the drums meant. The time had come. The oppressors had pushed too far, taken too much, broken too many promises. The people would no longer remain silent.
+
+He looked at his mother, saw the determination in her eyes, the fire that had never been extinguished despite years of hardship. He looked at his father, saw the strength in his shoulders, the resolve in his stance. And he looked at his younger siblings, saw the hope in their faces, the belief that a better world was possible.
+
+"The drums are calling," his father said, his voice steady. "It is time."`,
+          contentHtml: `<h1>The Call</h1>
+<p>The drums started at dawn, their rhythm cutting through the morning mist like a blade. In the village, people stopped what they were doing and listened. The message was clear, though no words were spoken—only the beat, the pulse, the call to action.</p>
+<p>Kofi, a young man who had grown up hearing stories of freedom fighters, felt his heart quicken. He knew what the drums meant. The time had come. The oppressors had pushed too far, taken too much, broken too many promises. The people would no longer remain silent.</p>
+<p>He looked at his mother, saw the determination in her eyes, the fire that had never been extinguished despite years of hardship. He looked at his father, saw the strength in his shoulders, the resolve in his stance. And he looked at his younger siblings, saw the hope in their faces, the belief that a better world was possible.</p>
+<p>"The drums are calling," his father said, his voice steady. "It is time."</p>`,
+          contentText: "The drums started at dawn, their rhythm cutting through the morning mist like a blade. In the village, people stopped what they were doing and listened. The message was clear, though no words were spoken—only the beat, the pulse, the call to action. Kofi, a young man who had grown up hearing stories of freedom fighters, felt his heart quicken. He knew what the drums meant. The time had come. The oppressors had pushed too far, taken too much, broken too many promises. The people would no longer remain silent. He looked at his mother, saw the determination in her eyes, the fire that had never been extinguished despite years of hardship. He looked at his father, saw the strength in his shoulders, the resolve in his stance. And he looked at his younger siblings, saw the hope in their faces, the belief that a better world was possible. The drums are calling, his father said, his voice steady. It is time."
+        },
+        {
+          id: "ch2",
+          title: "Chapter 2: The Gathering",
+          contentMarkdown: `# The Gathering
+
+From every village, from every town, from every corner of the land, they came. Men and women, young and old, united by a common purpose. They gathered in the clearing, beneath the great tree that had witnessed generations of struggle, and they listened as their leaders spoke.
+
+"We have been patient," said Nana Adjoa, an elder whose voice carried the weight of years. "We have been peaceful. We have tried to reason, to negotiate, to find a way forward that did not require conflict. But our patience has been mistaken for weakness, and our peace has been taken for granted."
+
+The crowd murmured in agreement. They had all felt the weight of oppression, had all experienced the injustice, had all dreamed of a day when they would be free.
+
+"We are not asking for anything that is not rightfully ours," continued Nana Adjoa. "We are asking for our freedom, for our dignity, for our right to determine our own destiny. And if they will not give it to us, then we will take it."
+
+The drums began to beat again, louder this time, more urgent. The people raised their voices in response, a chorus of determination, of resolve, of unity. They were ready. They were willing. They would not be stopped.`,
+          contentHtml: `<h1>The Gathering</h1>
+<p>From every village, from every town, from every corner of the land, they came. Men and women, young and old, united by a common purpose. They gathered in the clearing, beneath the great tree that had witnessed generations of struggle, and they listened as their leaders spoke.</p>
+<p>"We have been patient," said Nana Adjoa, an elder whose voice carried the weight of years. "We have been peaceful. We have tried to reason, to negotiate, to find a way forward that did not require conflict. But our patience has been mistaken for weakness, and our peace has been taken for granted."</p>
+<p>The crowd murmured in agreement. They had all felt the weight of oppression, had all experienced the injustice, had all dreamed of a day when they would be free.</p>
+<p>"We are not asking for anything that is not rightfully ours," continued Nana Adjoa. "We are asking for our freedom, for our dignity, for our right to determine our own destiny. And if they will not give it to us, then we will take it."</p>
+<p>The drums began to beat again, louder this time, more urgent. The people raised their voices in response, a chorus of determination, of resolve, of unity. They were ready. They were willing. They would not be stopped.</p>`,
+          contentText: "From every village, from every town, from every corner of the land, they came. Men and women, young and old, united by a common purpose. They gathered in the clearing, beneath the great tree that had witnessed generations of struggle, and they listened as their leaders spoke. We have been patient, said Nana Adjoa, an elder whose voice carried the weight of years. We have been peaceful. We have tried to reason, to negotiate, to find a way forward that did not require conflict. But our patience has been mistaken for weakness, and our peace has been taken for granted. The crowd murmured in agreement. They had all felt the weight of oppression, had all experienced the injustice, had all dreamed of a day when they would be free. We are not asking for anything that is not rightfully ours, continued Nana Adjoa. We are asking for our freedom, for our dignity, for our right to determine our own destiny. And if they will not give it to us, then we will take it. The drums began to beat again, louder this time, more urgent. The people raised their voices in response, a chorus of determination, of resolve, of unity. They were ready. They were willing. They would not be stopped."
+        },
+        {
+          id: "ch3",
+          title: "Chapter 3: The Victory",
+          contentMarkdown: `# The Victory
+
+The struggle was long and hard. There were losses, setbacks, moments when it seemed that all hope was lost. But the people did not give up. They remembered why they were fighting, remembered the generations that had come before them, remembered the generations that would come after.
+
+They fought not just with weapons, but with words, with ideas, with the unshakeable belief that freedom was their birthright. They organized, they strategized, they supported each other, and slowly, inexorably, they began to win.
+
+The day finally came when the oppressors left, when the flag of freedom was raised, when the drums beat not in warning, but in celebration. The people danced in the streets, their voices raised in song, their hearts full of joy and pride.
+
+But they also remembered. They remembered the cost of freedom, the sacrifices that had been made, the lives that had been lost. They vowed to honor those sacrifices by building a nation that was truly free, truly just, truly their own.
+
+And the drums continued to beat, not just in celebration, but as a reminder—a reminder of the struggle, of the victory, of the responsibility that came with freedom. They beat for the past, for the present, and for the future, a rhythm that would never be silenced, a call that would never be forgotten.`,
+          contentHtml: `<h1>The Victory</h1>
+<p>The struggle was long and hard. There were losses, setbacks, moments when it seemed that all hope was lost. But the people did not give up. They remembered why they were fighting, remembered the generations that had come before them, remembered the generations that would come after.</p>
+<p>They fought not just with weapons, but with words, with ideas, with the unshakeable belief that freedom was their birthright. They organized, they strategized, they supported each other, and slowly, inexorably, they began to win.</p>
+<p>The day finally came when the oppressors left, when the flag of freedom was raised, when the drums beat not in warning, but in celebration. The people danced in the streets, their voices raised in song, their hearts full of joy and pride.</p>
+<p>But they also remembered. They remembered the cost of freedom, the sacrifices that had been made, the lives that had been lost. They vowed to honor those sacrifices by building a nation that was truly free, truly just, truly their own.</p>
+<p>And the drums continued to beat, not just in celebration, but as a reminder—a reminder of the struggle, of the victory, of the responsibility that came with freedom. They beat for the past, for the present, and for the future, a rhythm that would never be silenced, a call that would never be forgotten.</p>`,
+          contentText: "The struggle was long and hard. There were losses, setbacks, moments when it seemed that all hope was lost. But the people did not give up. They remembered why they were fighting, remembered the generations that had come before them, remembered the generations that would come after. They fought not just with weapons, but with words, with ideas, with the unshakeable belief that freedom was their birthright. They organized, they strategized, they supported each other, and slowly, inexorably, they began to win. The day finally came when the oppressors left, when the flag of freedom was raised, when the drums beat not in warning, but in celebration. The people danced in the streets, their voices raised in song, their hearts full of joy and pride. But they also remembered. They remembered the cost of freedom, the sacrifices that had been made, the lives that had been lost. They vowed to honor those sacrifices by building a nation that was truly free, truly just, truly their own. And the drums continued to beat, not just in celebration, but as a reminder—a reminder of the struggle, of the victory, of the responsibility that came with freedom. They beat for the past, for the present, and for the future, a rhythm that would never be silenced, a call that would never be forgotten."
+        }
+      ]
+    }
   }
 ]
 

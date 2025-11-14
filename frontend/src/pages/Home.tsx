@@ -94,19 +94,6 @@ export default function Home() {
           animate="visible"
           variants={containerVariants}
         >
-          <motion.div
-            variants={itemVariants}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
-          >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            >
-              <Sparkles size={16} className="text-primary" />
-            </motion.div>
-            <span className="text-sm font-medium text-primary">Welcome to Afriverse</span>
-          </motion.div>
-
           <motion.h1
             variants={itemVariants}
             className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-foreground leading-tight text-balance"
@@ -170,8 +157,7 @@ export default function Home() {
                 <motion.div
                   key={idx}
                   variants={itemVariants}
-                  className="text-center p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 hover:border-primary/40 transition-all duration-300 ease-out hover:shadow-xl"
-                  whileHover={{ y: -8, scale: 1.02 }}
+                  className="text-center p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 transition-all duration-300 ease-out"
                 >
                   <div className="flex justify-center mb-4">
                     <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center transition-all duration-300 ease-out group-hover:bg-primary/20 group-hover:scale-110">
@@ -222,8 +208,7 @@ export default function Home() {
                 <motion.div
                   key={idx}
                   variants={itemVariants}
-                  className="p-8 rounded-2xl bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 transition-all duration-300 ease-out hover:shadow-xl group"
-                  whileHover={{ y: -8, scale: 1.01 }}
+                  className="p-8 rounded-2xl bg-background/80 backdrop-blur-sm border border-border/60 transition-all duration-300 ease-out group"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}

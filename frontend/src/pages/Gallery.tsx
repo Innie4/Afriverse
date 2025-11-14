@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
+import { useSearchParams } from "react-router-dom"
 import StoryCard from "@/components/story-card"
 import { Search, Filter, X, Loader2 } from "lucide-react"
 import AuroraBackground from "@/components/aurora-background"
@@ -13,13 +14,22 @@ const categories = ["All", "Folklore", "Contemporary", "Historical", "Educationa
 type SortOption = "newest" | "popular" | "trending"
 
 export default function Gallery() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchParams] = useSearchParams()
+  const urlSearch = searchParams.get("search") || ""
+  const [searchQuery, setSearchQuery] = useState(urlSearch)
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [sortBy, setSortBy] = useState<SortOption>("newest")
   const [showFilters, setShowFilters] = useState(false)
   const [stories, setStories] = useState<Story[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Sync URL search param with state
+  useEffect(() => {
+    if (urlSearch && urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch)
+    }
+  }, [urlSearch])
 
   // Fetch stories from API
   useEffect(() => {
@@ -44,10 +54,15 @@ export default function Gallery() {
 
   const filteredAndSortedStories = useMemo(() => {
     let filtered = stories.filter((story) => {
+      const searchLower = searchQuery.toLowerCase()
       const matchesSearch =
-        (story.title?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
-        story.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (story.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
+        (story.title?.toLowerCase().includes(searchLower) || false) ||
+        story.author.toLowerCase().includes(searchLower) ||
+        (story.description?.toLowerCase().includes(searchLower) || false) ||
+        (story.metadata?.tags?.some((tag: string) => tag.toLowerCase().includes(searchLower)) || false) ||
+        (story.metadata?.attributes?.some((attr: any) => 
+          typeof attr?.value === "string" && attr.value.toLowerCase().includes(searchLower)
+        ) || false)
 
       // Map tribe to category for filtering (simplified)
       const storyCategory = story.tribe || "Contemporary"

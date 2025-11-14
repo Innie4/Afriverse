@@ -152,6 +152,7 @@ export default function StoryUploadForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [success, setSuccess] = useState(false)
   const [showTransaction, setShowTransaction] = useState(false)
   const [txHash, setTxHash] = useState<string | null>(null)
@@ -244,18 +245,56 @@ export default function StoryUploadForm() {
       [name]: value,
     }))
     setError("")
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev }
+        delete next[name]
+        return next
+      })
+    }
   }
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-    setFormData((previous) => ({
-      ...previous,
-      image: file,
-    }))
-    const reader = new FileReader()
-    reader.onloadend = () => setImagePreview(reader.result as string)
-    reader.readAsDataURL(file)
+    
+    // Validate image size (1200x800)
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      if (img.width !== 1200 || img.height !== 800) {
+        setFieldErrors((prev) => ({
+          ...prev,
+          image: `Image must be exactly 1200x800 pixels. Current size: ${img.width}x${img.height}px`
+        }))
+        setImagePreview(null)
+        event.target.value = ""
+        return
+      }
+      setFieldErrors((prev) => {
+        const next = { ...prev }
+        delete next.image
+        return next
+      })
+      setFormData((previous) => ({
+        ...previous,
+        image: file,
+      }))
+      const reader = new FileReader()
+      reader.onloadend = () => setImagePreview(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      setFieldErrors((prev) => ({
+        ...prev,
+        image: "Invalid image file"
+      }))
+      event.target.value = ""
+    }
+    img.src = objectUrl
   }
 
   const setTextAreaRef = (id: string) => (node: HTMLTextAreaElement | null) => {
@@ -392,40 +431,57 @@ export default function StoryUploadForm() {
   }
 
   const validateForm = () => {
+    const errors: Record<string, string> = {}
+    let isValid = true
+
     if (!formData.title.trim()) {
-      setError("Story title is required")
-      return false
+      errors.title = "Story title is required"
+      isValid = false
     }
     if (!formData.author.trim()) {
-      setError("Author name is required")
-      return false
+      errors.author = "Author name is required"
+      isValid = false
     }
     if (!formData.category) {
-      setError("Please select a category")
-      return false
+      errors.category = "Please select a category"
+      isValid = false
     }
     if (!formData.description.trim()) {
-      setError("Description is required")
-      return false
+      errors.description = "Description is required"
+      isValid = false
     }
     const hasContent = chapters.some((chapter) => chapter.content.trim().length > 0)
     if (!hasContent) {
-      setError("Please add content to at least one chapter")
-      return false
+      errors.chapters = "Please add content to at least one chapter"
+      isValid = false
     }
     if (!formData.tribe.trim()) {
-      setError("Tribe/cultural group is required")
-      return false
+      errors.tribe = "Tribe/cultural group is required"
+      isValid = false
     }
     if (!formData.language.trim()) {
-      setError("Language is required")
-      return false
+      errors.language = "Language is required"
+      isValid = false
+    }
+    if (fieldErrors.image) {
+      isValid = false
     }
     if (!isConnected) {
-      setError("Please connect your wallet first")
-      return false
+      errors.wallet = "Please connect your wallet first"
+      isValid = false
     }
-    return true
+
+    setFieldErrors(errors)
+    if (!isValid) {
+      setError("Please fix the errors below")
+      // Scroll to first error
+      const firstErrorField = Object.keys(errors)[0]
+      if (firstErrorField) {
+        const element = document.querySelector(`[name="${firstErrorField}"], #${firstErrorField}`)
+        element?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }
+    }
+    return isValid
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -581,7 +637,28 @@ export default function StoryUploadForm() {
   return (
     <div className="relative">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {!isConnected && (
+        {fieldErrors.wallet && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 flex items-center justify-between flex-wrap gap-4"
+          >
+            <div className="flex items-center gap-3">
+              <Wallet size={24} className="text-destructive" />
+              <div>
+                <p className="font-semibold text-sm text-destructive">{fieldErrors.wallet}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={connectWallet}
+              className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 transition-colors text-sm"
+            >
+              {checkMetaMask() ? "Connect Wallet" : "Install MetaMask"}
+            </button>
+          </motion.div>
+        )}
+        {!isConnected && !fieldErrors.wallet && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -709,7 +786,7 @@ export default function StoryUploadForm() {
           <p className="text-xs text-muted-foreground mb-3">
             Select the creative expression that best describes this submission. We tailor tips and metadata for your choice.
           </p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-wrap gap-3">
             {expressionOptions.map((option) => {
               const isActive = formData.expressionType === option.value
               return (
@@ -718,7 +795,7 @@ export default function StoryUploadForm() {
                   key={option.value}
                   onClick={() => setFormData((previous) => ({ ...previous, expressionType: option.value }))}
                   className={cn(
-                    "rounded-xl border border-border bg-card/60 p-4 text-left transition hover:border-primary/60 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary",
+                    "flex-1 min-w-[200px] rounded-xl border border-border bg-card/60 p-4 text-left transition hover:border-primary/60 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary",
                     isActive && "border-primary bg-primary/10 shadow-md"
                   )}
                 >
@@ -731,22 +808,30 @@ export default function StoryUploadForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-2">Story Cover Image</label>
-          <div className="relative border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-muted/30">
+          <label className="block text-sm font-semibold mb-2">Story Cover Image *</label>
+          <div className={cn(
+            "relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer bg-muted/30",
+            fieldErrors.image ? "border-destructive" : "border-border hover:border-primary/50"
+          )}>
             <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
             {imagePreview ? (
               <div className="space-y-3">
                 <img src={imagePreview || "/placeholder.svg"} alt="Preview" className="w-32 h-32 object-cover rounded-lg mx-auto" />
                 <p className="text-sm text-muted-foreground">Click to change image</p>
+                <p className="text-xs text-primary">✓ Image size: 1200x800px</p>
               </div>
             ) : (
               <div className="space-y-3">
                 <Upload size={32} className="text-muted-foreground mx-auto" />
                 <p className="font-medium">Drag and drop your image here</p>
                 <p className="text-sm text-muted-foreground">or click to browse</p>
+                <p className="text-xs text-muted-foreground">Required: 1200x800 pixels</p>
               </div>
             )}
           </div>
+          {fieldErrors.image && (
+            <p className="mt-1 text-xs text-destructive">{fieldErrors.image}</p>
+          )}
         </div>
 
         <div>
@@ -760,8 +845,14 @@ export default function StoryUploadForm() {
             value={formData.title}
             onChange={handleInputChange}
             placeholder="Enter the title of your work"
-            className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className={cn(
+              "w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2",
+              fieldErrors.title ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+            )}
           />
+          {fieldErrors.title && (
+            <p className="mt-1 text-xs text-destructive">{fieldErrors.title}</p>
+          )}
         </div>
 
         <div>
@@ -775,8 +866,14 @@ export default function StoryUploadForm() {
             value={formData.author}
             onChange={handleInputChange}
             placeholder="Your name, collective, or pen name"
-            className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className={cn(
+              "w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2",
+              fieldErrors.author ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+            )}
           />
+          {fieldErrors.author && (
+            <p className="mt-1 text-xs text-destructive">{fieldErrors.author}</p>
+          )}
         </div>
 
         <div>
@@ -787,11 +884,19 @@ export default function StoryUploadForm() {
             onChange={(nextValue) => {
               setFormData((previous) => ({ ...previous, tribe: nextValue }))
               setError("")
+              setFieldErrors((prev) => {
+                const next = { ...prev }
+                delete next.tribe
+                return next
+              })
             }}
             options={tribeOptions}
             placeholder="Search and select a tribe or cultural group"
             helperText="We curated a wide list across Africa. Start typing to search."
           />
+          {fieldErrors.tribe && (
+            <p className="mt-1 text-xs text-destructive">{fieldErrors.tribe}</p>
+          )}
         </div>
 
         <div>
@@ -802,11 +907,19 @@ export default function StoryUploadForm() {
             onChange={(nextValue) => {
               setFormData((previous) => ({ ...previous, language: nextValue }))
               setError("")
+              setFieldErrors((prev) => {
+                const next = { ...prev }
+                delete next.language
+                return next
+              })
             }}
             options={languageOptions}
             placeholder="Search languages spoken across Africa"
             helperText="Select the primary language of this work."
           />
+          {fieldErrors.language && (
+            <p className="mt-1 text-xs text-destructive">{fieldErrors.language}</p>
+          )}
         </div>
 
         <div>
@@ -818,7 +931,10 @@ export default function StoryUploadForm() {
             name="category"
             value={formData.category}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className={cn(
+              "w-full px-4 py-2 rounded-lg border bg-background text-foreground focus:outline-none focus:ring-2",
+              fieldErrors.category ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+            )}
           >
             <option value="">Select a category</option>
             {categories.map((cat) => (
@@ -827,6 +943,9 @@ export default function StoryUploadForm() {
               </option>
             ))}
           </select>
+          {fieldErrors.category && (
+            <p className="mt-1 text-xs text-destructive">{fieldErrors.category}</p>
+          )}
         </div>
 
         <div>
@@ -841,9 +960,17 @@ export default function StoryUploadForm() {
             placeholder="Brief summary of your work (max 200 characters)"
             maxLength={200}
             rows={3}
-            className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            className={cn(
+              "w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 resize-none",
+              fieldErrors.description ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+            )}
           />
-          <p className="text-xs text-muted-foreground mt-1">{formData.description.length}/200</p>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs text-muted-foreground">{formData.description.length}/200</p>
+            {fieldErrors.description && (
+              <p className="text-xs text-destructive">{fieldErrors.description}</p>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -889,6 +1016,9 @@ export default function StoryUploadForm() {
             </div>
           </div>
 
+          {fieldErrors.chapters && (
+            <p className="text-xs text-destructive mb-2">{fieldErrors.chapters}</p>
+          )}
           <div className="space-y-6">
             {chapters.map((chapter, index) => (
               <div key={chapter.id} className="rounded-lg border border-border bg-card/40 p-4 shadow-sm">
@@ -971,14 +1101,39 @@ export default function StoryUploadForm() {
                     </button>
                   </div>
 
-                  <textarea
-                    ref={setTextAreaRef(chapter.id)}
-                    value={chapter.content}
-                    onChange={(event) => handleChapterContentChange(chapter.id, event.target.value)}
-                    rows={8}
-                    placeholder={expressionConfig.chapterPlaceholder}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <textarea
+                        ref={setTextAreaRef(chapter.id)}
+                        value={chapter.content}
+                        onChange={(event) => {
+                          handleChapterContentChange(chapter.id, event.target.value)
+                          // Auto-update preview
+                          requestAnimationFrame(() => {
+                            const preview = document.getElementById(`preview-${chapter.id}`)
+                            if (preview) {
+                              const markdown = event.target.value
+                              const html = DOMPurify.sanitize((marked.parse(markdown) as string) || "")
+                              preview.innerHTML = html || "<p class='text-muted-foreground text-sm italic'>Preview will appear here...</p>"
+                            }
+                          })
+                        }}
+                        rows={8}
+                        placeholder={expressionConfig.chapterPlaceholder}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                      <div
+                        id={`preview-${chapter.id}`}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm leading-relaxed prose prose-sm max-w-none overflow-auto"
+                        style={{ minHeight: "200px", maxHeight: "200px" }}
+                        dangerouslySetInnerHTML={{
+                          __html: chapter.content
+                            ? DOMPurify.sanitize((marked.parse(chapter.content) as string) || "")
+                            : "<p class='text-muted-foreground text-sm italic'>Preview will appear here...</p>"
+                        }}
+                      />
+                    </div>
+                  </div>
                   <p className="text-xs text-muted-foreground">{expressionConfig.toolbarHint}</p>
                 </div>
               </div>

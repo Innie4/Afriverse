@@ -3,32 +3,7 @@ import TribalPatternOverlay from "@/components/tribal-pattern-overlay"
 import StoryUploadForm from "@/components/story-upload-form"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import { BookOpen, Cloud, Lock, Shield } from "lucide-react"
-
 export default function Upload() {
-  const benefits = [
-    {
-      icon: BookOpen,
-      title: "Chapter-by-Chapter Publishing",
-      description: "Add chapters over time, format with rich tools, and keep crafting until you are ready to mint.",
-    },
-    {
-      icon: Cloud,
-      title: "Decentralized Storage",
-      description: "Your stories are stored securely on IPFS and the blockchain.",
-    },
-    {
-      icon: Lock,
-      title: "Full Ownership",
-      description: "Retain creative rights over stories, art, music, film scripts, and folklore curations.",
-    },
-    {
-      icon: Shield,
-      title: "Protect Your IP",
-      description: "Claim your cultural intellectual property with blockchain proof.",
-    },
-  ]
-
   return (
     <div className="min-h-screen bg-background flex flex-col relative">
       <Navbar />
@@ -64,22 +39,6 @@ export default function Upload() {
           </div>
         </div>
 
-        {/* Benefits */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 relative z-10">
-          {benefits.map((benefit, idx) => {
-            const Icon = benefit.icon
-            return (
-              <div
-                key={idx}
-                className="text-center p-6 rounded-lg bg-background border border-border hover:border-primary/50 transition-all hover:shadow-lg"
-              >
-                <Icon size={32} className="text-primary mx-auto mb-3" />
-                <h3 className="font-semibold mb-2">{benefit.title}</h3>
-                <p className="text-sm text-muted-foreground">{benefit.description}</p>
-              </div>
-            )
-          })}
-        </div>
       </section>
 
       {/* Form Section */}
