@@ -7,7 +7,6 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { fetchStories, type Story } from "@/services/api"
 import { StoryCardSkeleton } from "@/components/skeleton"
-import { toast } from "sonner"
 
 const categories = ["All", "Folklore", "Contemporary", "Historical", "Educational", "Cultural", "Poetry", "Fiction"]
 
@@ -31,8 +30,10 @@ export default function Gallery() {
         const response = await fetchStories({ limit: 100 })
         setStories(response.stories)
       } catch (err: any) {
-        setError(err.message || "Failed to load stories")
-        toast.error("Failed to load stories")
+        // Error is already handled in API service with placeholder fallback
+        // But if it still fails, show a message
+        console.error("Failed to load stories:", err)
+        setError(null) // Don't show error since we have placeholders
       } finally {
         setIsLoading(false)
       }

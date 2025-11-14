@@ -37,14 +37,26 @@ export default function StoryDetail() {
         setStory(storyData)
         
         // Load related stories (same tribe or language)
-        const related = await fetchStories({ 
-          tribe: storyData.tribe,
-          limit: 4 
-        })
-        setRelatedStories(related.stories.filter(s => s.tokenId !== tokenId).slice(0, 3))
+        try {
+          const related = await fetchStories({ 
+            tribe: storyData.tribe,
+            limit: 4 
+          })
+          setRelatedStories(related.stories.filter(s => s.tokenId !== tokenId).slice(0, 3))
+        } catch (relErr) {
+          // If related stories fail, just don't show them
+          console.warn("Failed to load related stories:", relErr)
+          setRelatedStories([])
+        }
       } catch (err: any) {
-        toast.error(err.message || "Failed to load story")
-        navigate("/gallery")
+        // If story not found even in placeholders, navigate away
+        if (err.message === "Story not found") {
+          toast.error("Story not found")
+          navigate("/gallery")
+        } else {
+          // Other errors are handled by placeholder fallback in API
+          console.error("Error loading story:", err)
+        }
       } finally {
         setIsLoading(false)
       }

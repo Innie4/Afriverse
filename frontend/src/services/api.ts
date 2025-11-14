@@ -1,4 +1,6 @@
 // API service for backend integration
+import { placeholderStories, placeholderToStory } from "@/data/placeholderStories"
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"
 
 export interface Story {
@@ -48,37 +50,78 @@ export async function fetchStories(params?: {
   page?: number
   limit?: number
 }): Promise<StoriesResponse> {
-  const queryParams = new URLSearchParams()
-  if (params?.tribe) queryParams.append("tribe", params.tribe)
-  if (params?.language) queryParams.append("language", params.language)
-  if (params?.author) queryParams.append("author", params.author)
-  if (params?.page) queryParams.append("page", params.page.toString())
-  if (params?.limit) queryParams.append("limit", params.limit.toString())
+  try {
+    const queryParams = new URLSearchParams()
+    if (params?.tribe) queryParams.append("tribe", params.tribe)
+    if (params?.language) queryParams.append("language", params.language)
+    if (params?.author) queryParams.append("author", params.author)
+    if (params?.page) queryParams.append("page", params.page.toString())
+    if (params?.limit) queryParams.append("limit", params.limit.toString())
 
-  const url = `${API_BASE_URL}/stories${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
-  const response = await fetch(url)
+    const url = `${API_BASE_URL}/stories${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
+    const response = await fetch(url)
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch stories: ${response.statusText}`)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch stories: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    // Fallback to placeholder data on API failure
+    console.warn("API fetch failed, using placeholder data:", error)
+    let filtered = placeholderStories.map(placeholderToStory)
+    
+    // Apply filters if provided
+    if (params?.tribe) {
+      filtered = filtered.filter(s => s.tribe === params.tribe)
+    }
+    if (params?.language) {
+      filtered = filtered.filter(s => s.language === params.language)
+    }
+    if (params?.author) {
+      filtered = filtered.filter(s => s.author.toLowerCase().includes(params.author!.toLowerCase()))
+    }
+    
+    const limit = params?.limit || 100
+    const page = params?.page || 1
+    const start = (page - 1) * limit
+    const paginated = filtered.slice(start, start + limit)
+    
+    return {
+      stories: paginated,
+      pagination: {
+        page,
+        limit,
+        total: filtered.length
+      }
+    }
   }
-
-  return response.json()
 }
 
 /**
  * Fetch a single story by token ID
  */
 export async function fetchStoryById(tokenId: number): Promise<Story> {
-  const response = await fetch(`${API_BASE_URL}/stories/${tokenId}`)
+  try {
+    const response = await fetch(`${API_BASE_URL}/stories/${tokenId}`)
 
-  if (!response.ok) {
-    if (response.status === 404) {
-      throw new Error("Story not found")
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Story not found")
+      }
+      throw new Error(`Failed to fetch story: ${response.statusText}`)
     }
-    throw new Error(`Failed to fetch story: ${response.statusText}`)
-  }
 
-  return response.json()
+    return response.json()
+  } catch (error) {
+    // Fallback to placeholder data on API failure
+    console.warn("API fetch failed, using placeholder data:", error)
+    const placeholder = placeholderStories.find(p => p.tokenId === tokenId)
+    if (placeholder) {
+      return placeholderToStory(placeholder)
+    }
+    throw new Error("Story not found")
+  }
 }
 
 /**
