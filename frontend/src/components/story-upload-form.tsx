@@ -31,6 +31,7 @@ import { SearchableMultiSelect } from "@/components/searchable-multi-select"
 import { marked } from "marked"
 import DOMPurify from "dompurify"
 import { cn } from "@/lib/utils"
+import MetaMaskModal from "@/components/metamask-modal"
 
 type ExpressionType = "writer" | "artist" | "folklore" | "filmmaker"
 
@@ -158,6 +159,7 @@ export default function StoryUploadForm() {
   const [txHash, setTxHash] = useState<string | null>(null)
   const [tokenId, setTokenId] = useState<string | null>(null)
   const [step, setStep] = useState<"form" | "uploading" | "minting" | "success">("form")
+  const [showMetaMaskModal, setShowMetaMaskModal] = useState(false)
 
   const expressionConfig = expressionDetails[formData.expressionType]
   const activeExpression = expressionOptions.find((option) => option.value === formData.expressionType)
@@ -651,7 +653,13 @@ export default function StoryUploadForm() {
             </div>
             <button
               type="button"
-              onClick={connectWallet}
+              onClick={() => {
+                if (checkMetaMask()) {
+                  connectWallet()
+                } else {
+                  setShowMetaMaskModal(true)
+                }
+              }}
               className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 transition-colors text-sm"
             >
               {checkMetaMask() ? "Connect Wallet" : "Install MetaMask"}
@@ -675,7 +683,13 @@ export default function StoryUploadForm() {
             </div>
             <button
               type="button"
-              onClick={connectWallet}
+              onClick={() => {
+                if (checkMetaMask()) {
+                  connectWallet()
+                } else {
+                  setShowMetaMaskModal(true)
+                }
+              }}
               className="px-4 py-2 bg-accent text-accent-foreground rounded-lg font-medium hover:bg-accent/90 transition-colors text-sm"
             >
               {checkMetaMask() ? "Connect Wallet" : "Install MetaMask"}
@@ -1194,6 +1208,8 @@ export default function StoryUploadForm() {
           </ul>
         </div>
       </form>
+
+      <MetaMaskModal isOpen={showMetaMaskModal} onClose={() => setShowMetaMaskModal(false)} />
     </div>
   )
 }

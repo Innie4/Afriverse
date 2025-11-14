@@ -5,7 +5,7 @@ import AuroraBackground from "@/components/aurora-background"
 import TribalPatternOverlay from "@/components/tribal-pattern-overlay"
 import Footer from "@/components/footer"
 import Navbar from "@/components/navbar"
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 
 function TypewriterText({ words }: { words: string[] }) {
   const [currentWordIndex, setCurrentWordIndex] = useState(0)

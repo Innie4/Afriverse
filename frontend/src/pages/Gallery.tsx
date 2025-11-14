@@ -37,7 +37,7 @@ export default function Gallery() {
       setIsLoading(true)
       setError(null)
       try {
-        const response = await fetchStories({ limit: 100 })
+        const response = await fetchStories({ limit: 1000 })
         setStories(response.stories)
       } catch (err: any) {
         // Error is already handled in API service with placeholder fallback

@@ -1,17 +1,39 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, User, LogOut } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
+import { toast } from "sonner"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const { isAuthenticated, user, logout } = useAuth()
+  const navigate = useNavigate()
 
-  const links = [
+  const unauthenticatedLinks = [
+    { href: "/", label: "Home" },
+    { href: "/gallery", label: "Gallery" },
+    { href: "/about", label: "About" },
+  ]
+
+  const authenticatedLinks = [
     { href: "/", label: "Home" },
     { href: "/gallery", label: "Gallery" },
     { href: "/upload", label: "Upload" },
     { href: "/my-stories", label: "My Stories" },
     { href: "/about", label: "About" },
   ]
+
+  const links = isAuthenticated ? authenticatedLinks : unauthenticatedLinks
+
+  const closeMenu = () => setIsOpen(false)
+  const toggleMenu = () => setIsOpen((prev) => !prev)
+
+  const handleLogout = () => {
+    logout()
+    toast.success("Logged out successfully")
+    navigate("/")
+    closeMenu()
+  }
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -26,9 +48,6 @@ export default function Navbar() {
 
     return () => window.removeEventListener("keydown", handleEsc)
   }, [isOpen])
-
-  const closeMenu = () => setIsOpen(false)
-  const toggleMenu = () => setIsOpen((prev) => !prev)
 
   return (
     <>
@@ -75,14 +94,47 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* CTA Button */}
-            <div className="order-5 md:order-3 hidden md:block md:ml-6">
-              <Link
-                to="/upload"
-                className="px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-medium hover:bg-accent/90 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Mint Work
-              </Link>
+            {/* Auth Buttons */}
+            <div className="order-5 md:order-3 hidden md:flex items-center gap-3 md:ml-6">
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/60 hover:bg-muted/80 transition-all duration-300 ease-out hover:shadow-md"
+                  >
+                    <User size={18} />
+                    <span className="text-sm font-medium">{user?.name || "Profile"}</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/60 hover:bg-muted/80 transition-all duration-300 ease-out hover:shadow-md"
+                  >
+                    <LogOut size={18} />
+                    <span className="text-sm font-medium">Logout</span>
+                  </button>
+                  <Link
+                    to="/upload"
+                    className="px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-medium hover:bg-accent/90 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Mint Work
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="px-4 py-2.5 rounded-xl border border-border/60 hover:bg-muted/80 transition-all duration-300 ease-out hover:shadow-md text-sm font-medium"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-medium hover:bg-accent/90 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -117,16 +169,64 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/upload"
-              className={`block px-4 py-3 bg-accent text-accent-foreground rounded-xl font-medium transition-all duration-300 ease-out hover:bg-accent/90 hover:shadow-lg hover:scale-[1.02] transform ${
-                isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
-              }`}
-              style={{ transitionDelay: `${links.length * 60}ms` }}
-              onClick={closeMenu}
-            >
-              Mint Work
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/profile"
+                  className={`flex items-center gap-2 px-4 py-3 rounded-xl text-foreground transition-all duration-300 ease-out hover:bg-muted/80 hover:translate-x-1 transform ${
+                    isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+                  }`}
+                  style={{ transitionDelay: `${links.length * 60}ms` }}
+                  onClick={closeMenu}
+                >
+                  <User size={18} />
+                  Profile
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl text-foreground transition-all duration-300 ease-out hover:bg-muted/80 hover:translate-x-1 transform ${
+                    isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+                  }`}
+                  style={{ transitionDelay: `${(links.length + 1) * 60}ms` }}
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+                <Link
+                  to="/upload"
+                  className={`block px-4 py-3 bg-accent text-accent-foreground rounded-xl font-medium transition-all duration-300 ease-out hover:bg-accent/90 hover:shadow-lg hover:scale-[1.02] transform ${
+                    isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+                  }`}
+                  style={{ transitionDelay: `${(links.length + 2) * 60}ms` }}
+                  onClick={closeMenu}
+                >
+                  Mint Work
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className={`block px-4 py-3 rounded-xl text-foreground transition-all duration-300 ease-out hover:bg-muted/80 hover:translate-x-1 transform ${
+                    isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+                  }`}
+                  style={{ transitionDelay: `${links.length * 60}ms` }}
+                  onClick={closeMenu}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className={`block px-4 py-3 bg-accent text-accent-foreground rounded-xl font-medium transition-all duration-300 ease-out hover:bg-accent/90 hover:shadow-lg hover:scale-[1.02] transform ${
+                    isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+                  }`}
+                  style={{ transitionDelay: `${(links.length + 1) * 60}ms` }}
+                  onClick={closeMenu}
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

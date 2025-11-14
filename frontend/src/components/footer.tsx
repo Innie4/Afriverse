@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Facebook, Twitter, Instagram } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
 
 const socialLinks = [
   { href: "https://www.facebook.com", label: "Facebook", icon: Facebook },
@@ -8,6 +9,16 @@ const socialLinks = [
 ]
 
 export default function Footer() {
+  const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+
+  const handleProtectedLink = (path: string, e: React.MouseEvent) => {
+    if (!isAuthenticated && (path === "/upload" || path === "/my-stories")) {
+      e.preventDefault()
+      navigate("/login")
+    }
+  }
+
   return (
     <footer className="bg-gradient-to-b from-muted/40 to-muted/60 border-t border-border/60 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -26,8 +37,24 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Platform</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/gallery" className="hover:text-foreground transition-colors">Gallery</Link></li>
-              <li><Link to="/upload" className="hover:text-foreground transition-colors">Submit Work</Link></li>
-              <li><Link to="/my-stories" className="hover:text-foreground transition-colors">My Creations</Link></li>
+              <li>
+                <Link 
+                  to="/upload" 
+                  onClick={(e) => handleProtectedLink("/upload", e)}
+                  className="hover:text-foreground transition-colors"
+                >
+                  Submit Work
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/my-stories" 
+                  onClick={(e) => handleProtectedLink("/my-stories", e)}
+                  className="hover:text-foreground transition-colors"
+                >
+                  My Creations
+                </Link>
+              </li>
               <li><Link to="/about" className="hover:text-foreground transition-colors">About</Link></li>
             </ul>
           </div>
