@@ -177,7 +177,7 @@ export default function StoryDetail() {
             />
           )}
           
-          <div className="flex-1 max-w-3xl">
+          <div className="flex-1 max-w-3xl mx-auto">
           {/* Header Card */}
           <div className="bg-card/95 backdrop-blur-sm border border-border/60 rounded-2xl p-8 mb-8 shadow-xl">
             {/* Single Tag Badge */}

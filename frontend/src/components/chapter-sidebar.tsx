@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Menu, X } from "lucide-react"
+import { Book, BookOpen, X } from "lucide-react"
 import { useState } from "react"
 
 interface Chapter {
@@ -34,14 +34,14 @@ export default function ChapterSidebar({ chapters, storyId, currentChapter }: Ch
 
   return (
     <>
-      {/* Mobile Hamburger Button */}
-      <div className="md:hidden mb-4">
+      {/* Mobile Book Button - Fixed */}
+      <div className="md:hidden fixed top-20 right-4 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border/60 bg-background/80 hover:bg-muted/80 transition-all duration-300 ease-out"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/90 backdrop-blur-md border border-primary/60 shadow-lg hover:bg-primary transition-all duration-300 ease-out hover:scale-110 active:scale-95"
+          aria-label="Toggle chapters"
         >
-          <Menu size={20} />
-          <span className="font-medium">Chapters</span>
+          {isOpen ? <BookOpen size={24} className="text-primary-foreground" /> : <Book size={24} className="text-primary-foreground" />}
         </button>
       </div>
 

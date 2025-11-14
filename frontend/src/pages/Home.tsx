@@ -3,9 +3,50 @@ import { Link } from "react-router-dom"
 import { Sparkles, Users, ArrowRight, Shield, Globe, BookOpen, Heart, Award } from "lucide-react"
 import AuroraBackground from "@/components/aurora-background"
 import TribalPatternOverlay from "@/components/tribal-pattern-overlay"
-import ParallaxHero from "@/components/parallax-hero"
 import Footer from "@/components/footer"
 import Navbar from "@/components/navbar"
+import { useEffect, useState } from "react"
+
+function TypewriterText({ words }: { words: string[] }) {
+  const [currentWordIndex, setCurrentWordIndex] = useState(0)
+  const [currentText, setCurrentText] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  useEffect(() => {
+    const currentWord = words[currentWordIndex]
+    const typingSpeed = isDeleting ? 100 : 150
+    
+    const timer = setTimeout(() => {
+      if (!isDeleting) {
+        // Typing
+        if (currentText.length < currentWord.length) {
+          setCurrentText(currentWord.substring(0, currentText.length + 1))
+        } else {
+          // Finished typing, wait then start deleting
+          setTimeout(() => setIsDeleting(true), 2000)
+        }
+      } else {
+        // Deleting
+        if (currentText.length > 0) {
+          setCurrentText(currentText.substring(0, currentText.length - 1))
+        } else {
+          // Finished deleting, move to next word
+          setIsDeleting(false)
+          setCurrentWordIndex((prev) => (prev + 1) % words.length)
+        }
+      }
+    }, typingSpeed)
+
+    return () => clearTimeout(timer)
+  }, [currentText, isDeleting, currentWordIndex, words])
+
+  return (
+    <span className="text-primary">
+      {currentText}
+      <span className="animate-pulse">|</span>
+    </span>
+  )
+}
 
 export default function Home() {
   const features = [
@@ -98,7 +139,7 @@ export default function Home() {
             variants={itemVariants}
             className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-foreground leading-tight text-balance"
           >
-            Preserve Your <span className="text-primary">Stories</span> Forever
+            Preserve Your <TypewriterText words={["Stories", "Works", "Concepts"]} /> Forever
           </motion.h1>
 
           <motion.p
@@ -126,16 +167,6 @@ export default function Home() {
             >
               Explore Gallery
             </Link>
-          </motion.div>
-
-          {/* Parallax Hero Image */}
-          <motion.div
-            variants={itemVariants}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
-            <ParallaxHero imageSrc="/african-storytelling-nft-web3-heritage.jpg" alt="Afriverse hero" />
           </motion.div>
         </motion.div>
       </section>
