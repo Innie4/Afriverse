@@ -90,6 +90,27 @@ export default function StoryDetail() {
     setShowShareMenu(false)
   }
 
+  // All hooks must be called before any conditional returns
+  const metadata = story?.metadata || {}
+  const gateway = import.meta.env.VITE_IPFS_GATEWAY || "https://ipfs.io/ipfs/"
+  const rawImage = metadata.image || story?.ipfsUrl
+  const coverImage = typeof rawImage === "string" && rawImage.startsWith("ipfs://") ? rawImage.replace("ipfs://", gateway) : rawImage || "/placeholder.svg"
+  const chapters = useMemo(() => (Array.isArray(metadata.chapters) ? metadata.chapters : []), [metadata.chapters])
+  const summary = metadata.summary || story?.description || "A story from Afriverse"
+  const attributeArray = Array.isArray(metadata.attributes) ? metadata.attributes : []
+  const attributeTags = useMemo(() => 
+    attributeArray
+      .filter((attr: any) => typeof attr?.value === "string" && (attr.trait_type === "Tags" || attr.trait_type === "Tag"))
+      .flatMap((attr: any) => (attr.value as string).split(/[,;]+/).map((tag) => tag.trim())),
+    [attributeArray]
+  )
+  const metadataTags = Array.isArray(metadata.tags) ? metadata.tags : []
+  const tags = useMemo(() => Array.from(new Set([...metadataTags, ...attributeTags].filter(Boolean))), [metadataTags, attributeTags])
+  const expressionAttr = useMemo(() =>
+    metadata.expressionType || attributeArray.find((attr: any) => attr?.trait_type === "Expression Type")?.value || "Creative Work",
+    [metadata.expressionType, attributeArray]
+  )
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -120,21 +141,6 @@ export default function StoryDetail() {
       </div>
     )
   }
-
-  const metadata = story.metadata || {}
-  const gateway = import.meta.env.VITE_IPFS_GATEWAY || "https://ipfs.io/ipfs/"
-  const rawImage = metadata.image || story.ipfsUrl
-  const coverImage = typeof rawImage === "string" && rawImage.startsWith("ipfs://") ? rawImage.replace("ipfs://", gateway) : rawImage || "/placeholder.svg"
-  const chapters = useMemo(() => (Array.isArray(metadata.chapters) ? metadata.chapters : []), [metadata.chapters])
-  const summary = metadata.summary || story.description || "A story from Afriverse"
-  const attributeArray = Array.isArray(metadata.attributes) ? metadata.attributes : []
-  const attributeTags = attributeArray
-    .filter((attr: any) => typeof attr?.value === "string" && (attr.trait_type === "Tags" || attr.trait_type === "Tag"))
-    .flatMap((attr: any) => (attr.value as string).split(/[,;]+/).map((tag) => tag.trim()))
-  const metadataTags = Array.isArray(metadata.tags) ? metadata.tags : []
-  const tags = Array.from(new Set([...metadataTags, ...attributeTags].filter(Boolean)))
-  const expressionAttr =
-    metadata.expressionType || attributeArray.find((attr: any) => attr?.trait_type === "Expression Type")?.value || "Creative Work"
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
