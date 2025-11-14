@@ -496,6 +496,372 @@ And the drums continued to beat, not just in celebration, but as a reminder—a 
         }
       ]
     }
+  },
+  {
+    tokenId: 1006,
+    title: "After Midnight",
+    author: "0xSherahDaniels1234567890abcdef",
+    tribe: "Horror",
+    language: "English",
+    description: "A chilling tale of a late-night encounter that turns into a nightmare beyond imagination.",
+    image: "/african-heritage-culture-art.jpg",
+    category: "Horror",
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    metadata: {
+      name: "After Midnight",
+      summary: "I went out last night to turn on the pump. It was already 11 p.m., and my mother shook me awake because she wanted to take her bath. What started as a simple errand in the dark became a terrifying encounter with something beyond understanding.",
+      expressionType: "Horror",
+      tags: ["horror", "supernatural", "nightmare", "fear"],
+      attributes: [
+        { trait_type: "Expression Type", value: "Horror" },
+        { trait_type: "Genre", value: "horror" },
+        { trait_type: "Tags", value: "horror,supernatural,nightmare,fear" }
+      ],
+      chapters: [
+        {
+          id: "ch1",
+          title: "Chapter 1: The Awakening",
+          contentMarkdown: `# The Awakening
+
+I went out last night to turn on the pump.
+
+It was already 11 p.m., and my mother shook me awake because she wanted to take her bath. I woke to the heavy heat of the room pressing against my skin, the type that made the walls feel closer than they actually were. My eyes burned from sleep, but she stood over me with that quiet urgency she gets sometimes.
+
+Annoyance sat heavy in my chest—not loud, just hot, like the air itself. We were all suffering this heat. Why couldn't she wait?
+
+I dragged myself out of bed, muttering under my breath, and slipped my feet into the nearest slippers. She promised to follow me, even apologized for waking me. It wasn't the apology that bothered me—it was how soft her voice sounded, almost fragile. Not like her.
+
+But I pushed the thought away.
+
+We stepped outside, and the night wrapped around us like wet cloth—dark, thick, humming with its own life. I flicked on my torch, its weak beam dancing across the ground and the bush behind our house. Our area had always been a place where strange things passed through—the crawling ones you could see, and the others you could only feel.
+
+And always, at night, the witches played their drums in the distance.
+
+Tonight, the silence was too clean.`,
+          contentHtml: `<h1>The Awakening</h1>
+<p>I went out last night to turn on the pump.</p>
+<p>It was already 11 p.m., and my mother shook me awake because she wanted to take her bath. I woke to the heavy heat of the room pressing against my skin, the type that made the walls feel closer than they actually were. My eyes burned from sleep, but she stood over me with that quiet urgency she gets sometimes.</p>
+<p>Annoyance sat heavy in my chest—not loud, just hot, like the air itself. We were all suffering this heat. Why couldn't she wait?</p>
+<p>I dragged myself out of bed, muttering under my breath, and slipped my feet into the nearest slippers. She promised to follow me, even apologized for waking me. It wasn't the apology that bothered me—it was how soft her voice sounded, almost fragile. Not like her.</p>
+<p>But I pushed the thought away.</p>
+<p>We stepped outside, and the night wrapped around us like wet cloth—dark, thick, humming with its own life. I flicked on my torch, its weak beam dancing across the ground and the bush behind our house. Our area had always been a place where strange things passed through—the crawling ones you could see, and the others you could only feel.</p>
+<p>And always, at night, the witches played their drums in the distance.</p>
+<p>Tonight, the silence was too clean.</p>`,
+          contentText: "I went out last night to turn on the pump. It was already 11 p.m., and my mother shook me awake because she wanted to take her bath. I woke to the heavy heat of the room pressing against my skin, the type that made the walls feel closer than they actually were. My eyes burned from sleep, but she stood over me with that quiet urgency she gets sometimes. Annoyance sat heavy in my chest—not loud, just hot, like the air itself. We were all suffering this heat. Why couldn't she wait? I dragged myself out of bed, muttering under my breath, and slipped my feet into the nearest slippers. She promised to follow me, even apologized for waking me. It wasn't the apology that bothered me—it was how soft her voice sounded, almost fragile. Not like her. But I pushed the thought away. We stepped outside, and the night wrapped around us like wet cloth—dark, thick, humming with its own life. I flicked on my torch, its weak beam dancing across the ground and the bush behind our house. Our area had always been a place where strange things passed through—the crawling ones you could see, and the others you could only feel. And always, at night, the witches played their drums in the distance. Tonight, the silence was too clean."
+        },
+        {
+          id: "ch2",
+          title: "Chapter 2: The Encounter",
+          contentMarkdown: `# The Encounter
+
+I walked slowly, feeling the gravel shift under my feet, checking over my shoulder every few steps to make sure my mother was still behind me. She kept close, but her breathing sounded… different. A little too calm.
+
+We hadn't even reached the pump when something slipped across my leg.
+
+Cold. Long. Smooth like a wet rope.
+
+I didn't think—I just jumped back and ran.
+
+My slippers slapped the ground loudly as I sprinted across the compound. My mother shouted my name, her voice cracking in a way I'd never heard, but fear pushed everything else to the edges of my mind.
+
+By the time I reached the steps of the house, my heart was knocking so hard I could feel it in my throat. I slammed my hand against the wall to steady myself—
+
+But the wall closed fingers around mine.
+
+Human fingers.
+
+Warm, firm, and deliberate.
+
+My blood froze. The world narrowed to the slow turn of my head as I looked up.
+
+A cat—as tall as a human, shoulders broad, eyes glowing yellow like lanterns—stood beside me. Its whiskers twitched, and its lips curled into something that wasn't quite a smile.
+
+"Boo," it said.
+
+Just that.
+
+My mind didn't break, but it bent. I ripped my hand free and stumbled inside the house, slamming the door behind me.`,
+          contentHtml: `<h1>The Encounter</h1>
+<p>I walked slowly, feeling the gravel shift under my feet, checking over my shoulder every few steps to make sure my mother was still behind me. She kept close, but her breathing sounded… different. A little too calm.</p>
+<p>We hadn't even reached the pump when something slipped across my leg.</p>
+<p>Cold. Long. Smooth like a wet rope.</p>
+<p>I didn't think—I just jumped back and ran.</p>
+<p>My slippers slapped the ground loudly as I sprinted across the compound. My mother shouted my name, her voice cracking in a way I'd never heard, but fear pushed everything else to the edges of my mind.</p>
+<p>By the time I reached the steps of the house, my heart was knocking so hard I could feel it in my throat. I slammed my hand against the wall to steady myself—</p>
+<p>But the wall closed fingers around mine.</p>
+<p>Human fingers.</p>
+<p>Warm, firm, and deliberate.</p>
+<p>My blood froze. The world narrowed to the slow turn of my head as I looked up.</p>
+<p>A cat—as tall as a human, shoulders broad, eyes glowing yellow like lanterns—stood beside me. Its whiskers twitched, and its lips curled into something that wasn't quite a smile.</p>
+<p>"Boo," it said.</p>
+<p>Just that.</p>
+<p>My mind didn't break, but it bent. I ripped my hand free and stumbled inside the house, slamming the door behind me.</p>`,
+          contentText: "I walked slowly, feeling the gravel shift under my feet, checking over my shoulder every few steps to make sure my mother was still behind me. She kept close, but her breathing sounded… different. A little too calm. We hadn't even reached the pump when something slipped across my leg. Cold. Long. Smooth like a wet rope. I didn't think—I just jumped back and ran. My slippers slapped the ground loudly as I sprinted across the compound. My mother shouted my name, her voice cracking in a way I'd never heard, but fear pushed everything else to the edges of my mind. By the time I reached the steps of the house, my heart was knocking so hard I could feel it in my throat. I slammed my hand against the wall to steady myself— But the wall closed fingers around mine. Human fingers. Warm, firm, and deliberate. My blood froze. The world narrowed to the slow turn of my head as I looked up. A cat—as tall as a human, shoulders broad, eyes glowing yellow like lanterns—stood beside me. Its whiskers twitched, and its lips curled into something that wasn't quite a smile. Boo, it said. Just that. My mind didn't break, but it bent. I ripped my hand free and stumbled inside the house, slamming the door behind me."
+        },
+        {
+          id: "ch3",
+          title: "Chapter 3: The Horror",
+          contentMarkdown: `# The Horror
+
+The laughter followed me immediately—high-pitched, low-pitched, layered, echoing like a crowd enjoying a private joke. And somewhere in the distance, the witches' drums fell completely silent.
+
+Only then did I remember my mother wasn't with me.
+
+Panic pushed me toward the window. If I couldn't go out, at least I could look.
+
+I pulled the blind, but something soft was pressed against the glass from outside. Cloth? Skin? I couldn't tell. I pushed the window a little open and tugged at it.
+
+It moved.
+
+Then an enormous eyeball opened right in front of my face.
+
+White, wet, wide.
+
+I tried to scream, but my voice refused to come out.
+
+Something gripped my ankle.
+
+Hard.
+
+Dry fingers, sharp-knuckled, gripping bone through flesh. Another hand clamped over my mouth, not warm—just stiff, as if it hadn't held life in decades.
+
+The room stayed dark, but in that darkness, shapes shifted. Something crawled toward me on all fours, slow and crooked.
+
+Her hair was the first thing I recognized.
+
+Then her dress.
+
+Then her face.
+
+My mother—crawling into the glow from the window, her head twisted sharply backwards, her empty sockets staring at me, black and weeping.
+
+My knees buckled.
+
+The tall cat-creature stepped out behind her, holding a leash that dragged against the tiles.
+
+Somewhere behind me, the calendar on the wall fluttered as the breeze passed. Reflex made me glance at it.
+
+My hand trembled as I touched her photo.
+
+The word "Late" under her name seemed brighter now, almost freshly printed.
+
+Outside, three crows shot up into the air at once, scattering in different directions as if fleeing the thing now filling my house.
+
+Everything inside me broke open at once.
+
+And finally, I screamed.`,
+          contentHtml: `<h1>The Horror</h1>
+<p>The laughter followed me immediately—high-pitched, low-pitched, layered, echoing like a crowd enjoying a private joke. And somewhere in the distance, the witches' drums fell completely silent.</p>
+<p>Only then did I remember my mother wasn't with me.</p>
+<p>Panic pushed me toward the window. If I couldn't go out, at least I could look.</p>
+<p>I pulled the blind, but something soft was pressed against the glass from outside. Cloth? Skin? I couldn't tell. I pushed the window a little open and tugged at it.</p>
+<p>It moved.</p>
+<p>Then an enormous eyeball opened right in front of my face.</p>
+<p>White, wet, wide.</p>
+<p>I tried to scream, but my voice refused to come out.</p>
+<p>Something gripped my ankle.</p>
+<p>Hard.</p>
+<p>Dry fingers, sharp-knuckled, gripping bone through flesh. Another hand clamped over my mouth, not warm—just stiff, as if it hadn't held life in decades.</p>
+<p>The room stayed dark, but in that darkness, shapes shifted. Something crawled toward me on all fours, slow and crooked.</p>
+<p>Her hair was the first thing I recognized.</p>
+<p>Then her dress.</p>
+<p>Then her face.</p>
+<p>My mother—crawling into the glow from the window, her head twisted sharply backwards, her empty sockets staring at me, black and weeping.</p>
+<p>My knees buckled.</p>
+<p>The tall cat-creature stepped out behind her, holding a leash that dragged against the tiles.</p>
+<p>Somewhere behind me, the calendar on the wall fluttered as the breeze passed. Reflex made me glance at it.</p>
+<p>My hand trembled as I touched her photo.</p>
+<p>The word "Late" under her name seemed brighter now, almost freshly printed.</p>
+<p>Outside, three crows shot up into the air at once, scattering in different directions as if fleeing the thing now filling my house.</p>
+<p>Everything inside me broke open at once.</p>
+<p>And finally, I screamed.</p>`,
+          contentText: "The laughter followed me immediately—high-pitched, low-pitched, layered, echoing like a crowd enjoying a private joke. And somewhere in the distance, the witches' drums fell completely silent. Only then did I remember my mother wasn't with me. Panic pushed me toward the window. If I couldn't go out, at least I could look. I pulled the blind, but something soft was pressed against the glass from outside. Cloth? Skin? I couldn't tell. I pushed the window a little open and tugged at it. It moved. Then an enormous eyeball opened right in front of my face. White, wet, wide. I tried to scream, but my voice refused to come out. Something gripped my ankle. Hard. Dry fingers, sharp-knuckled, gripping bone through flesh. Another hand clamped over my mouth, not warm—just stiff, as if it hadn't held life in decades. The room stayed dark, but in that darkness, shapes shifted. Something crawled toward me on all fours, slow and crooked. Her hair was the first thing I recognized. Then her dress. Then her face. My mother—crawling into the glow from the window, her head twisted sharply backwards, her empty sockets staring at me, black and weeping. My knees buckled. The tall cat-creature stepped out behind her, holding a leash that dragged against the tiles. Somewhere behind me, the calendar on the wall fluttered as the breeze passed. Reflex made me glance at it. My hand trembled as I touched her photo. The word Late under her name seemed brighter now, almost freshly printed. Outside, three crows shot up into the air at once, scattering in different directions as if fleeing the thing now filling my house. Everything inside me broke open at once. And finally, I screamed."
+        }
+      ]
+    }
+  },
+  {
+    tokenId: 1007,
+    title: "Bound by Honor",
+    author: "0xSherahDaniels9876543210fedcba",
+    tribe: "Thriller",
+    language: "English",
+    description: "A gripping tale of loyalty, betrayal, and the price of honor in a world where nothing is as it seems.",
+    image: "/african-heritage-culture-art.jpg",
+    category: "Thriller",
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    metadata: {
+      name: "Bound by Honor",
+      summary: "I went out last night to turn on the pump. It was already 11 p.m., and my mother shook me awake because she wanted to take her bath. What started as a simple errand in the dark became a terrifying encounter with something beyond understanding.",
+      expressionType: "Thriller",
+      tags: ["mystery", "suspense", "thriller", "honor"],
+      attributes: [
+        { trait_type: "Expression Type", value: "Thriller" },
+        { trait_type: "Genre", value: "mystery" },
+        { trait_type: "Tags", value: "mystery,suspense,thriller,honor" }
+      ],
+      chapters: [
+        {
+          id: "ch1",
+          title: "Chapter 1: The Awakening",
+          contentMarkdown: `# The Awakening
+
+I went out last night to turn on the pump.
+
+It was already 11 p.m., and my mother shook me awake because she wanted to take her bath. I woke to the heavy heat of the room pressing against my skin, the type that made the walls feel closer than they actually were. My eyes burned from sleep, but she stood over me with that quiet urgency she gets sometimes.
+
+Annoyance sat heavy in my chest—not loud, just hot, like the air itself. We were all suffering this heat. Why couldn't she wait?
+
+I dragged myself out of bed, muttering under my breath, and slipped my feet into the nearest slippers. She promised to follow me, even apologized for waking me. It wasn't the apology that bothered me—it was how soft her voice sounded, almost fragile. Not like her.
+
+But I pushed the thought away.
+
+We stepped outside, and the night wrapped around us like wet cloth—dark, thick, humming with its own life. I flicked on my torch, its weak beam dancing across the ground and the bush behind our house. Our area had always been a place where strange things passed through—the crawling ones you could see, and the others you could only feel.
+
+And always, at night, the witches played their drums in the distance.
+
+Tonight, the silence was too clean.`,
+          contentHtml: `<h1>The Awakening</h1>
+<p>I went out last night to turn on the pump.</p>
+<p>It was already 11 p.m., and my mother shook me awake because she wanted to take her bath. I woke to the heavy heat of the room pressing against my skin, the type that made the walls feel closer than they actually were. My eyes burned from sleep, but she stood over me with that quiet urgency she gets sometimes.</p>
+<p>Annoyance sat heavy in my chest—not loud, just hot, like the air itself. We were all suffering this heat. Why couldn't she wait?</p>
+<p>I dragged myself out of bed, muttering under my breath, and slipped my feet into the nearest slippers. She promised to follow me, even apologized for waking me. It wasn't the apology that bothered me—it was how soft her voice sounded, almost fragile. Not like her.</p>
+<p>But I pushed the thought away.</p>
+<p>We stepped outside, and the night wrapped around us like wet cloth—dark, thick, humming with its own life. I flicked on my torch, its weak beam dancing across the ground and the bush behind our house. Our area had always been a place where strange things passed through—the crawling ones you could see, and the others you could only feel.</p>
+<p>And always, at night, the witches played their drums in the distance.</p>
+<p>Tonight, the silence was too clean.</p>`,
+          contentText: "I went out last night to turn on the pump. It was already 11 p.m., and my mother shook me awake because she wanted to take her bath. I woke to the heavy heat of the room pressing against my skin, the type that made the walls feel closer than they actually were. My eyes burned from sleep, but she stood over me with that quiet urgency she gets sometimes. Annoyance sat heavy in my chest—not loud, just hot, like the air itself. We were all suffering this heat. Why couldn't she wait? I dragged myself out of bed, muttering under my breath, and slipped my feet into the nearest slippers. She promised to follow me, even apologized for waking me. It wasn't the apology that bothered me—it was how soft her voice sounded, almost fragile. Not like her. But I pushed the thought away. We stepped outside, and the night wrapped around us like wet cloth—dark, thick, humming with its own life. I flicked on my torch, its weak beam dancing across the ground and the bush behind our house. Our area had always been a place where strange things passed through—the crawling ones you could see, and the others you could only feel. And always, at night, the witches played their drums in the distance. Tonight, the silence was too clean."
+        },
+        {
+          id: "ch2",
+          title: "Chapter 2: The Encounter",
+          contentMarkdown: `# The Encounter
+
+I walked slowly, feeling the gravel shift under my feet, checking over my shoulder every few steps to make sure my mother was still behind me. She kept close, but her breathing sounded… different. A little too calm.
+
+We hadn't even reached the pump when something slipped across my leg.
+
+Cold. Long. Smooth like a wet rope.
+
+I didn't think—I just jumped back and ran.
+
+My slippers slapped the ground loudly as I sprinted across the compound. My mother shouted my name, her voice cracking in a way I'd never heard, but fear pushed everything else to the edges of my mind.
+
+By the time I reached the steps of the house, my heart was knocking so hard I could feel it in my throat. I slammed my hand against the wall to steady myself—
+
+But the wall closed fingers around mine.
+
+Human fingers.
+
+Warm, firm, and deliberate.
+
+My blood froze. The world narrowed to the slow turn of my head as I looked up.
+
+A cat—as tall as a human, shoulders broad, eyes glowing yellow like lanterns—stood beside me. Its whiskers twitched, and its lips curled into something that wasn't quite a smile.
+
+"Boo," it said.
+
+Just that.
+
+My mind didn't break, but it bent. I ripped my hand free and stumbled inside the house, slamming the door behind me.`,
+          contentHtml: `<h1>The Encounter</h1>
+<p>I walked slowly, feeling the gravel shift under my feet, checking over my shoulder every few steps to make sure my mother was still behind me. She kept close, but her breathing sounded… different. A little too calm.</p>
+<p>We hadn't even reached the pump when something slipped across my leg.</p>
+<p>Cold. Long. Smooth like a wet rope.</p>
+<p>I didn't think—I just jumped back and ran.</p>
+<p>My slippers slapped the ground loudly as I sprinted across the compound. My mother shouted my name, her voice cracking in a way I'd never heard, but fear pushed everything else to the edges of my mind.</p>
+<p>By the time I reached the steps of the house, my heart was knocking so hard I could feel it in my throat. I slammed my hand against the wall to steady myself—</p>
+<p>But the wall closed fingers around mine.</p>
+<p>Human fingers.</p>
+<p>Warm, firm, and deliberate.</p>
+<p>My blood froze. The world narrowed to the slow turn of my head as I looked up.</p>
+<p>A cat—as tall as a human, shoulders broad, eyes glowing yellow like lanterns—stood beside me. Its whiskers twitched, and its lips curled into something that wasn't quite a smile.</p>
+<p>"Boo," it said.</p>
+<p>Just that.</p>
+<p>My mind didn't break, but it bent. I ripped my hand free and stumbled inside the house, slamming the door behind me.</p>`,
+          contentText: "I walked slowly, feeling the gravel shift under my feet, checking over my shoulder every few steps to make sure my mother was still behind me. She kept close, but her breathing sounded… different. A little too calm. We hadn't even reached the pump when something slipped across my leg. Cold. Long. Smooth like a wet rope. I didn't think—I just jumped back and ran. My slippers slapped the ground loudly as I sprinted across the compound. My mother shouted my name, her voice cracking in a way I'd never heard, but fear pushed everything else to the edges of my mind. By the time I reached the steps of the house, my heart was knocking so hard I could feel it in my throat. I slammed my hand against the wall to steady myself— But the wall closed fingers around mine. Human fingers. Warm, firm, and deliberate. My blood froze. The world narrowed to the slow turn of my head as I looked up. A cat—as tall as a human, shoulders broad, eyes glowing yellow like lanterns—stood beside me. Its whiskers twitched, and its lips curled into something that wasn't quite a smile. Boo, it said. Just that. My mind didn't break, but it bent. I ripped my hand free and stumbled inside the house, slamming the door behind me."
+        },
+        {
+          id: "ch3",
+          title: "Chapter 3: The Revelation",
+          contentMarkdown: `# The Revelation
+
+The laughter followed me immediately—high-pitched, low-pitched, layered, echoing like a crowd enjoying a private joke. And somewhere in the distance, the witches' drums fell completely silent.
+
+Only then did I remember my mother wasn't with me.
+
+Panic pushed me toward the window. If I couldn't go out, at least I could look.
+
+I pulled the blind, but something soft was pressed against the glass from outside. Cloth? Skin? I couldn't tell. I pushed the window a little open and tugged at it.
+
+It moved.
+
+Then an enormous eyeball opened right in front of my face.
+
+White, wet, wide.
+
+I tried to scream, but my voice refused to come out.
+
+Something gripped my ankle.
+
+Hard.
+
+Dry fingers, sharp-knuckled, gripping bone through flesh. Another hand clamped over my mouth, not warm—just stiff, as if it hadn't held life in decades.
+
+The room stayed dark, but in that darkness, shapes shifted. Something crawled toward me on all fours, slow and crooked.
+
+Her hair was the first thing I recognized.
+
+Then her dress.
+
+Then her face.
+
+My mother—crawling into the glow from the window, her head twisted sharply backwards, her empty sockets staring at me, black and weeping.
+
+My knees buckled.
+
+The tall cat-creature stepped out behind her, holding a leash that dragged against the tiles.
+
+Somewhere behind me, the calendar on the wall fluttered as the breeze passed. Reflex made me glance at it.
+
+My hand trembled as I touched her photo.
+
+The word "Late" under her name seemed brighter now, almost freshly printed.
+
+Outside, three crows shot up into the air at once, scattering in different directions as if fleeing the thing now filling my house.
+
+Everything inside me broke open at once.
+
+And finally, I screamed.`,
+          contentHtml: `<h1>The Revelation</h1>
+<p>The laughter followed me immediately—high-pitched, low-pitched, layered, echoing like a crowd enjoying a private joke. And somewhere in the distance, the witches' drums fell completely silent.</p>
+<p>Only then did I remember my mother wasn't with me.</p>
+<p>Panic pushed me toward the window. If I couldn't go out, at least I could look.</p>
+<p>I pulled the blind, but something soft was pressed against the glass from outside. Cloth? Skin? I couldn't tell. I pushed the window a little open and tugged at it.</p>
+<p>It moved.</p>
+<p>Then an enormous eyeball opened right in front of my face.</p>
+<p>White, wet, wide.</p>
+<p>I tried to scream, but my voice refused to come out.</p>
+<p>Something gripped my ankle.</p>
+<p>Hard.</p>
+<p>Dry fingers, sharp-knuckled, gripping bone through flesh. Another hand clamped over my mouth, not warm—just stiff, as if it hadn't held life in decades.</p>
+<p>The room stayed dark, but in that darkness, shapes shifted. Something crawled toward me on all fours, slow and crooked.</p>
+<p>Her hair was the first thing I recognized.</p>
+<p>Then her dress.</p>
+<p>Then her face.</p>
+<p>My mother—crawling into the glow from the window, her head twisted sharply backwards, her empty sockets staring at me, black and weeping.</p>
+<p>My knees buckled.</p>
+<p>The tall cat-creature stepped out behind her, holding a leash that dragged against the tiles.</p>
+<p>Somewhere behind me, the calendar on the wall fluttered as the breeze passed. Reflex made me glance at it.</p>
+<p>My hand trembled as I touched her photo.</p>
+<p>The word "Late" under her name seemed brighter now, almost freshly printed.</p>
+<p>Outside, three crows shot up into the air at once, scattering in different directions as if fleeing the thing now filling my house.</p>
+<p>Everything inside me broke open at once.</p>
+<p>And finally, I screamed.</p>`,
+          contentText: "The laughter followed me immediately—high-pitched, low-pitched, layered, echoing like a crowd enjoying a private joke. And somewhere in the distance, the witches' drums fell completely silent. Only then did I remember my mother wasn't with me. Panic pushed me toward the window. If I couldn't go out, at least I could look. I pulled the blind, but something soft was pressed against the glass from outside. Cloth? Skin? I couldn't tell. I pushed the window a little open and tugged at it. It moved. Then an enormous eyeball opened right in front of my face. White, wet, wide. I tried to scream, but my voice refused to come out. Something gripped my ankle. Hard. Dry fingers, sharp-knuckled, gripping bone through flesh. Another hand clamped over my mouth, not warm—just stiff, as if it hadn't held life in decades. The room stayed dark, but in that darkness, shapes shifted. Something crawled toward me on all fours, slow and crooked. Her hair was the first thing I recognized. Then her dress. Then her face. My mother—crawling into the glow from the window, her head twisted sharply backwards, her empty sockets staring at me, black and weeping. My knees buckled. The tall cat-creature stepped out behind her, holding a leash that dragged against the tiles. Somewhere behind me, the calendar on the wall fluttered as the breeze passed. Reflex made me glance at it. My hand trembled as I touched her photo. The word Late under her name seemed brighter now, almost freshly printed. Outside, three crows shot up into the air at once, scattering in different directions as if fleeing the thing now filling my house. Everything inside me broke open at once. And finally, I screamed."
+        }
+      ]
+    }
   }
 ]
 

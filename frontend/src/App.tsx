@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { Toaster } from 'sonner'
 import { ErrorBoundary } from '@/components/error-boundary'
+import ScrollToTop from '@/components/scroll-to-top'
 import Home from '@/pages/Home'
 import Gallery from '@/pages/Gallery'
 import Upload from '@/pages/Upload'
@@ -17,6 +18,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
+        <ScrollToTop />
         <div className="min-h-screen bg-background flex flex-col">
           <Toaster position="top-right" richColors />
           <AnimatePresence mode="wait">
