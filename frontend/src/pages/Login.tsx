@@ -78,7 +78,7 @@ export default function Login() {
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail size={20} className="absolute left-3 top-3 text-muted-foreground" />
+                  <Mail size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     id="email"
                     type="email"
@@ -101,7 +101,7 @@ export default function Login() {
                   Password
                 </label>
                 <div className="relative">
-                  <Lock size={20} className="absolute left-3 top-3 text-muted-foreground" />
+                  <Lock size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -118,7 +118,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>

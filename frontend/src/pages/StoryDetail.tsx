@@ -252,7 +252,7 @@ export default function StoryDetail() {
                 </button>
 
                 {showShareMenu && (
-                  <div className="absolute top-full mt-2 right-0 bg-card border border-border rounded-lg shadow-lg p-3 z-20 min-w-48">
+                  <div className="absolute top-full mt-2 right-0 sm:right-auto sm:left-0 bg-card border border-border rounded-lg shadow-lg p-3 z-20 min-w-48">
                     <button 
                       onClick={() => handleShare("twitter")}
                       className="block w-full text-left px-3 py-2 hover:bg-muted rounded transition-colors text-sm"

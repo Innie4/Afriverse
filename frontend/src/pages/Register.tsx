@@ -91,7 +91,7 @@ export default function Register() {
                   Full Name
                 </label>
                 <div className="relative">
-                  <User size={20} className="absolute left-3 top-3 text-muted-foreground" />
+                  <User size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     id="name"
                     type="text"
@@ -114,7 +114,7 @@ export default function Register() {
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail size={20} className="absolute left-3 top-3 text-muted-foreground" />
+                  <Mail size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     id="email"
                     type="email"
@@ -124,8 +124,8 @@ export default function Register() {
                       if (errors.email) setErrors({ ...errors, email: undefined })
                     }}
                     placeholder="your.email@example.com"
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 ${
-                      errors.email ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+                    className={`w-full pl-11 pr-4 py-3 rounded-xl border-[1.5px] bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      errors.email ? "border-destructive focus:ring-destructive" : "border-border/70 focus:ring-primary/30"
                     }`}
                   />
                 </div>
@@ -137,7 +137,7 @@ export default function Register() {
                   Password
                 </label>
                 <div className="relative">
-                  <Lock size={20} className="absolute left-3 top-3 text-muted-foreground" />
+                  <Lock size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -147,14 +147,14 @@ export default function Register() {
                       if (errors.password) setErrors({ ...errors, password: undefined })
                     }}
                     placeholder="Enter your password"
-                    className={`w-full pl-10 pr-12 py-2.5 rounded-xl border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 ${
-                      errors.password ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+                    className={`w-full pl-11 pr-12 py-3 rounded-xl border-[1.5px] bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      errors.password ? "border-destructive focus:ring-destructive" : "border-border/70 focus:ring-primary/30"
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -168,7 +168,7 @@ export default function Register() {
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <Lock size={20} className="absolute left-3 top-3 text-muted-foreground" />
+                  <Lock size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
@@ -178,14 +178,14 @@ export default function Register() {
                       if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined })
                     }}
                     placeholder="Confirm your password"
-                    className={`w-full pl-10 pr-12 py-2.5 rounded-xl border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 ${
-                      errors.confirmPassword ? "border-destructive focus:ring-destructive" : "border-border focus:ring-primary"
+                    className={`w-full pl-11 pr-12 py-3 rounded-xl border-[1.5px] bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      errors.confirmPassword ? "border-destructive focus:ring-destructive" : "border-border/70 focus:ring-primary/30"
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                   >
                     {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
