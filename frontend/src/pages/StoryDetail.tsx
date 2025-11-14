@@ -33,7 +33,15 @@ export default function StoryDetail() {
       setIsLoading(true)
       try {
         const tokenId = parseInt(id)
+        if (isNaN(tokenId)) {
+          throw new Error("Invalid story ID")
+        }
+        
         const storyData = await fetchStoryById(tokenId)
+        if (!storyData) {
+          throw new Error("Story not found")
+        }
+        
         setStory(storyData)
         
         // Load related stories (same tribe or language)
@@ -50,13 +58,12 @@ export default function StoryDetail() {
         }
       } catch (err: any) {
         // If story not found even in placeholders, navigate away
-        if (err.message === "Story not found") {
-          toast.error("Story not found")
+        console.error("Error loading story:", err)
+        toast.error(err.message || "Failed to load story")
+        // Use requestAnimationFrame to avoid React hydration issues
+        requestAnimationFrame(() => {
           navigate("/gallery")
-        } else {
-          // Other errors are handled by placeholder fallback in API
-          console.error("Error loading story:", err)
-        }
+        })
       } finally {
         setIsLoading(false)
       }
@@ -103,7 +110,7 @@ export default function StoryDetail() {
             <p className="text-muted-foreground mb-4">This story doesn't exist or has been removed.</p>
             <Link
               to="/gallery"
-              className="px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 ease-out hover:shadow-lg hover:scale-105 active:scale-95"
             >
               Back to Gallery
             </Link>

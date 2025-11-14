@@ -37,21 +37,21 @@ export default function Home() {
 
   const stories = [
     {
-      id: 1,
+      id: 1001,
       title: "The Legend of Anansi",
       author: "Kwame Asante",
       category: "Folklore",
       image: "/african-spider-folklore-art.jpg",
     },
     {
-      id: 2,
+      id: 1002,
       title: "City Dreams",
       author: "Zara Okonkwo",
       category: "Contemporary",
       image: "/african-modern-city-art.jpg",
     },
     {
-      id: 3,
+      id: 1003,
       title: "Heritage Roots",
       author: "Kofi Mensah",
       category: "Historical",
