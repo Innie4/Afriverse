@@ -125,12 +125,58 @@ export async function createTables() {
       event_type VARCHAR(50),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS bundles (
+      id SERIAL PRIMARY KEY,
+      bundle_id VARCHAR(255) UNIQUE NOT NULL,
+      buyer_address VARCHAR(255) NOT NULL,
+      listing_ids INTEGER[] NOT NULL,
+      token_ids INTEGER[] NOT NULL,
+      total_price_wei BIGINT NOT NULL,
+      total_price_matic NUMERIC(20, 8),
+      discount_bps INTEGER DEFAULT 0,
+      discount_amount_wei BIGINT,
+      discount_amount_matic NUMERIC(20, 8),
+      platform_fee_wei BIGINT,
+      transaction_hash VARCHAR(255),
+      block_number INTEGER,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      user_address VARCHAR(255) NOT NULL,
+      type VARCHAR(50) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      message TEXT,
+      data JSONB,
+      read BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS lazy_mints (
+      id SERIAL PRIMARY KEY,
+      ipfs_hash VARCHAR(255) UNIQUE NOT NULL,
+      author_address VARCHAR(255) NOT NULL,
+      tribe VARCHAR(100),
+      language VARCHAR(50),
+      metadata JSONB,
+      minted BOOLEAN DEFAULT FALSE,
+      token_id INTEGER,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      minted_at TIMESTAMP
+    );
   `
 
   const indexQueries = [
     "CREATE INDEX IF NOT EXISTS idx_token_id ON stories(token_id)",
     "CREATE INDEX IF NOT EXISTS idx_author ON stories(author)",
     "CREATE INDEX IF NOT EXISTS idx_tribe ON stories(tribe)",
+    "CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_address)",
+    "CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read)",
+    "CREATE INDEX IF NOT EXISTS idx_lazy_mints_hash ON lazy_mints(ipfs_hash)",
+    "CREATE INDEX IF NOT EXISTS idx_lazy_mints_author ON lazy_mints(author_address)",
+    "CREATE INDEX IF NOT EXISTS idx_bundles_buyer ON bundles(buyer_address)",
     "CREATE INDEX IF NOT EXISTS idx_language ON stories(language)",
     "CREATE INDEX IF NOT EXISTS idx_created_at ON stories(created_at)",
     "CREATE INDEX IF NOT EXISTS idx_listings_token_id ON listings(token_id)",

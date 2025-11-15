@@ -16,6 +16,19 @@ import {
   getPriceHistory,
   getUserNFTs,
 } from "../controllers/marketplaceController.js"
+import { recordBundle, getBundleById, getUserBundles } from "../controllers/bundleController.js"
+import {
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  getUnreadNotificationCount,
+} from "../controllers/notificationController.js"
+import {
+  createLazyMint,
+  getLazyMint,
+  markLazyMintMinted,
+  getUserLazyMints,
+} from "../controllers/lazyMintController.js"
 import logger from "../config/logger.js"
 
 const router = express.Router()
@@ -57,6 +70,23 @@ router.post("/marketplace/offers", createOffer)
 router.patch("/marketplace/offers/:id/status", updateOfferStatus)
 router.get("/marketplace/price-history/:tokenId", getPriceHistory)
 router.get("/marketplace/users/:address/nfts", getUserNFTs)
+
+// Bundle routes
+router.post("/marketplace/bundles", recordBundle)
+router.get("/marketplace/bundles/:id", getBundleById)
+router.get("/marketplace/users/:address/bundles", getUserBundles)
+
+// Notification routes
+router.get("/notifications/:address", getNotifications)
+router.patch("/notifications/:id/read", markNotificationRead)
+router.patch("/notifications/:address/read-all", markAllNotificationsRead)
+router.get("/notifications/:address/unread-count", getUnreadNotificationCount)
+
+// Lazy mint routes
+router.post("/lazy-mints", createLazyMint)
+router.get("/lazy-mints/:ipfsHash", getLazyMint)
+router.patch("/lazy-mints/:ipfsHash/minted", markLazyMintMinted)
+router.get("/lazy-mints/users/:address", getUserLazyMints)
 
 // Error handling middleware for routes
 router.use((err, req, res, next) => {

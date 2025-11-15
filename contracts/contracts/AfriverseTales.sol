@@ -167,6 +167,92 @@ contract AfriverseTales is ERC721, ERC721URIStorage, ERC2981, Ownable {
         return tokenId;
     }
 
+    // Lazy minting: Mapping from IPFS hash to pending mint info
+    mapping(string => bool) private _lazyMinted;
+    mapping(string => address) private _lazyMintAuthor;
+
+    event LazyMintCreated(
+        string indexed ipfsHash,
+        address indexed author,
+        string tribe,
+        string language
+    );
+
+    /**
+     * @dev Create a lazy mint (off-chain metadata, mint on purchase)
+     * @param ipfsHash The IPFS hash of the story metadata
+     * @param tribe The tribe associated with the story
+     * @param language The language of the story
+     */
+    function createLazyMint(
+        string memory ipfsHash,
+        string memory tribe,
+        string memory language
+    ) public {
+        require(bytes(ipfsHash).length > 0, "IPFS hash cannot be empty");
+        require(!_lazyMinted[ipfsHash], "Lazy mint already exists");
+
+        _lazyMinted[ipfsHash] = true;
+        _lazyMintAuthor[ipfsHash] = msg.sender;
+
+        emit LazyMintCreated(ipfsHash, msg.sender, tribe, language);
+    }
+
+    /**
+     * @dev Mint a lazy-minted NFT (called by marketplace on purchase)
+     * @param to The address to mint the NFT to
+     * @param ipfsHash The IPFS hash that was lazy minted
+     * @return tokenId The ID of the newly minted token
+     */
+    function mintLazyMint(
+        address to,
+        string memory ipfsHash
+    ) public returns (uint256) {
+        require(_lazyMinted[ipfsHash], "Lazy mint does not exist");
+        require(to != address(0), "Cannot mint to zero address");
+
+        address author = _lazyMintAuthor[ipfsHash];
+        require(author != address(0), "Invalid author");
+
+        uint256 tokenId = _tokenIdCounter;
+        _tokenIdCounter++;
+
+        _safeMint(to, tokenId);
+
+        string memory ipfsURI = string(abi.encodePacked("ipfs://", ipfsHash));
+        _setTokenURI(tokenId, ipfsURI);
+
+        // Get metadata from IPFS (would need to be passed or fetched)
+        // For now, store basic info
+        _storyMetadata[tokenId] = StoryMetadata({
+            author: author,
+            tribe: "", // Would be fetched from IPFS
+            language: "", // Would be fetched from IPFS
+            timestamp: block.timestamp,
+            ipfsHash: ipfsHash
+        });
+
+        _ipfsHashes[tokenId] = ipfsHash;
+
+        // Mark as minted
+        delete _lazyMinted[ipfsHash];
+
+        emit StoryMinted(tokenId, ipfsHash, author, "", block.timestamp);
+
+        return tokenId;
+    }
+
+    /**
+     * @dev Check if a lazy mint exists
+     * @param ipfsHash The IPFS hash to check
+     * @return exists Whether the lazy mint exists
+     * @return author The author address if it exists
+     */
+    function getLazyMintInfo(string memory ipfsHash) public view returns (bool exists, address author) {
+        exists = _lazyMinted[ipfsHash];
+        author = _lazyMintAuthor[ipfsHash];
+    }
+
     /**
      * @dev Get story metadata for a token
      * @param tokenId The token ID

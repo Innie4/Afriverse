@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { Search, Filter, X, Loader2, ShoppingCart, Clock, Tag } from "lucide-react"
+import { Search, Filter, X, Loader2, ShoppingCart, Clock, Tag, Package, Check } from "lucide-react"
 import AuroraBackground from "@/components/aurora-background"
 import TribalPatternOverlay from "@/components/tribal-pattern-overlay"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { fetchListings, type Listing } from "@/services/marketplaceApi"
 import { motion } from "framer-motion"
+import BundlePurchaseModal from "@/components/bundle-purchase-modal"
+import { useWeb3 } from "@/hooks/useWeb3"
 
 export default function Marketplace() {
   const [listings, setListings] = useState<Listing[]>([])
@@ -17,6 +19,9 @@ export default function Marketplace() {
   const [minPrice, setMinPrice] = useState("")
   const [maxPrice, setMaxPrice] = useState("")
   const [showFilters, setShowFilters] = useState(false)
+  const [selectedListings, setSelectedListings] = useState<Set<number>>(new Set())
+  const [showBundleModal, setShowBundleModal] = useState(false)
+  const { isConnected } = useWeb3()
 
   useEffect(() => {
     loadListings()
@@ -52,6 +57,24 @@ export default function Marketplace() {
       listing.story?.language?.toLowerCase().includes(query)
     )
   })
+
+  const toggleListingSelection = (listingId: number) => {
+    setSelectedListings((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(listingId)) {
+        newSet.delete(listingId)
+      } else {
+        newSet.add(listingId)
+      }
+      return newSet
+    })
+  }
+
+  const handleBundlePurchase = () => {
+    if (selectedListings.size >= 2) {
+      setShowBundleModal(true)
+    }
+  }
 
   const formatPrice = (matic: number) => {
     return `${matic.toFixed(4)} MATIC`
@@ -156,19 +179,30 @@ export default function Marketplace() {
       <section className="flex-1 px-4 sm:px-6 lg:px-8 py-12 relative">
         <TribalPatternOverlay />
         <div className="max-w-6xl mx-auto relative z-10">
-          {/* Results Info */}
-          <div className="mb-8">
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="animate-spin" size={20} />
-                <p className="text-muted-foreground">Loading listings...</p>
-              </div>
-            ) : error ? (
-              <p className="text-destructive">{error}</p>
-            ) : (
-              <p className="text-muted-foreground">
-                Found <span className="font-semibold text-foreground">{filteredListings.length}</span> listings
-              </p>
+          {/* Results Info & Bundle Actions */}
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="animate-spin" size={20} />
+                  <p className="text-muted-foreground">Loading listings...</p>
+                </div>
+              ) : error ? (
+                <p className="text-destructive">{error}</p>
+              ) : (
+                <p className="text-muted-foreground">
+                  Found <span className="font-semibold text-foreground">{filteredListings.length}</span> listings
+                </p>
+              )}
+            </div>
+            {isConnected && selectedListings.size >= 2 && (
+              <button
+                onClick={handleBundlePurchase}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
+              >
+                <Package size={18} />
+                Purchase Bundle ({selectedListings.size})
+              </button>
             )}
           </div>
 
@@ -189,8 +223,25 @@ export default function Marketplace() {
                   whileHover={{ y: -5 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Link to={`/story/${listing.tokenId}`} className="group cursor-pointer block">
-                    <div className="card-standard overflow-hidden">
+                  <div className="relative">
+                    {isConnected && listing.listingType === "fixed" && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          toggleListingSelection(listing.listingId)
+                        }}
+                        className={`absolute top-2 left-2 z-10 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                          selectedListings.has(listing.listingId)
+                            ? "bg-primary border-primary text-primary-foreground"
+                            : "bg-background/80 border-border hover:border-primary"
+                        }`}
+                      >
+                        {selectedListings.has(listing.listingId) && <Check size={16} />}
+                      </button>
+                    )}
+                    <Link to={`/story/${listing.tokenId}`} className="group cursor-pointer block">
+                      <div className="card-standard overflow-hidden">
                       {/* Image */}
                       <div className="relative h-64 overflow-hidden bg-muted">
                         <img
@@ -245,7 +296,8 @@ export default function Marketplace() {
                         </div>
                       </div>
                     </div>
-                  </Link>
+                    </Link>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -270,6 +322,22 @@ export default function Marketplace() {
       </section>
 
       <Footer />
+
+      {/* Bundle Purchase Modal */}
+      {showBundleModal && (
+        <BundlePurchaseModal
+          selectedListingIds={Array.from(selectedListings)}
+          onClose={() => {
+            setShowBundleModal(false)
+            setSelectedListings(new Set())
+          }}
+          onSuccess={() => {
+            setShowBundleModal(false)
+            setSelectedListings(new Set())
+            loadListings()
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "check-config": "node scripts/check-config.js",
+    "seed": "node src/scripts/seed-db.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -29,6 +30,8 @@
     "multer": "^2.0.0",
     "pg": "^8.11.3",
     "redis": "^4.6.11",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "web3.storage": "^4.5.5",
     "winston": "^3.11.0"
   }

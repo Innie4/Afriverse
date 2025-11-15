@@ -594,6 +594,98 @@ contract AfriverseMarketplace is Ownable, ReentrancyGuard {
         emit PlatformFeeUpdated(newFeeBps);
     }
 
+    event BundlePurchased(
+        address indexed buyer,
+        uint256[] tokenIds,
+        uint256 totalPrice,
+        uint256 discountAmount,
+        uint256 platformFee
+    );
+
+    /**
+     * @dev Purchase multiple NFTs as a bundle with discount
+     * @param listingIds Array of listing IDs to purchase
+     * @param discountBps Discount in basis points (e.g., 1000 = 10%)
+     */
+    function purchaseBundle(uint256[] calldata listingIds, uint256 discountBps) external payable nonReentrant {
+        require(listingIds.length >= 2, "Bundle must contain at least 2 NFTs");
+        require(listingIds.length <= 10, "Bundle cannot exceed 10 NFTs");
+        require(discountBps <= 5000, "Discount cannot exceed 50%");
+
+        uint256 totalPrice = 0;
+        uint256[] memory tokenIds = new uint256[](listingIds.length);
+        address[] memory sellers = new address[](listingIds.length);
+
+        // Validate all listings and calculate total price
+        for (uint256 i = 0; i < listingIds.length; i++) {
+            Listing storage listing = listings[listingIds[i]];
+            require(listing.status == ListingStatus.Active, "Listing not active");
+            require(listing.listingType == ListingType.FixedPrice, "Only fixed price listings in bundles");
+            require(msg.sender != listing.seller, "Cannot buy your own listing");
+
+            totalPrice += listing.price;
+            tokenIds[i] = listing.tokenId;
+            sellers[i] = listing.seller;
+        }
+
+        // Apply discount
+        uint256 discountAmount = (totalPrice * discountBps) / 10000;
+        uint256 bundlePrice = totalPrice - discountAmount;
+        require(msg.value >= bundlePrice, "Insufficient payment");
+
+        // Calculate fees
+        uint256 platformFee = (bundlePrice * platformFeeBps) / 10000;
+        uint256 totalRoyalty = 0;
+
+        // Process each purchase
+        for (uint256 i = 0; i < listingIds.length; i++) {
+            Listing storage listing = listings[listingIds[i]];
+            listing.status = ListingStatus.Sold;
+
+            // Calculate individual fees (proportional)
+            uint256 listingPrice = listing.price;
+            uint256 listingPlatformFee = (listingPrice * platformFeeBps) / 10000;
+            uint256 listingRoyalty = 0;
+            uint256 listingSellerAmount = listingPrice - listingPlatformFee;
+
+            // Try to get royalty info
+            try ERC2981(address(nftContract)).royaltyInfo(listing.tokenId, listingPrice) returns (
+                address recipient,
+                uint256 royaltyAmount
+            ) {
+                if (recipient != address(0) && royaltyAmount > 0) {
+                    listingRoyalty = royaltyAmount;
+                    listingSellerAmount -= listingRoyalty;
+                    totalRoyalty += listingRoyalty;
+                    (bool royaltySuccess, ) = payable(recipient).call{value: listingRoyalty}("");
+                    require(royaltySuccess, "Royalty transfer failed");
+                }
+            } catch {}
+
+            // Transfer NFT to buyer
+            nftContract.transferFrom(address(this), msg.sender, listing.tokenId);
+
+            // Transfer payment to seller (proportional to their listing price)
+            uint256 sellerShare = (listingSellerAmount * bundlePrice) / totalPrice;
+            (bool sellerSuccess, ) = payable(listing.seller).call{value: sellerShare}("");
+            require(sellerSuccess, "Seller transfer failed");
+
+            delete tokenListings[listing.tokenId];
+        }
+
+        // Transfer platform fee
+        (bool platformSuccess, ) = payable(owner()).call{value: platformFee}("");
+        require(platformSuccess, "Platform fee transfer failed");
+
+        // Refund excess payment
+        if (msg.value > bundlePrice) {
+            (bool refundSuccess, ) = payable(msg.sender).call{value: msg.value - bundlePrice}("");
+            require(refundSuccess, "Refund failed");
+        }
+
+        emit BundlePurchased(msg.sender, tokenIds, bundlePrice, discountAmount, platformFee);
+    }
+
     /**
      * @dev Emergency withdraw (owner only)
      */

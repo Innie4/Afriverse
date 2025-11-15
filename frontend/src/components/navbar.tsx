@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { Menu, X, User, LogOut } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
+import NotificationBell from "@/components/notification-bell"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -96,8 +97,15 @@ export default function Navbar() {
               ))}
             </div>
 
+            {/* Notifications */}
+            {isAuthenticated && (
+              <div className="order-4 md:order-3 hidden min-[1200px]:flex items-center">
+                <NotificationBell />
+              </div>
+            )}
+
             {/* Auth Buttons */}
-            <div className="order-5 md:order-3 hidden min-[1200px]:flex items-center gap-3 md:ml-6">
+            <div className="order-5 md:order-4 hidden min-[1200px]:flex items-center gap-3 md:ml-6">
               {isAuthenticated ? (
                 <>
                   <Link
@@ -158,6 +166,12 @@ export default function Navbar() {
           onClick={(event) => event.stopPropagation()}
         >
           <div className="px-4 py-4 space-y-2 overflow-y-auto h-full">
+            {/* Mobile Notifications */}
+            {isAuthenticated && (
+              <div className="mb-4 pb-4 border-b border-border">
+                <NotificationBell />
+              </div>
+            )}
             {links.map((link, index) => (
               <Link
                 key={link.href}

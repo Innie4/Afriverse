@@ -19,6 +19,7 @@ const MARKETPLACE_ABI = [
   "function createOffer(uint256 tokenId, uint256 duration) external payable",
   "function acceptOffer(uint256 tokenId, uint256 offerIndex) external",
   "function rejectOffer(uint256 tokenId, uint256 offerIndex) external",
+  "function purchaseBundle(uint256[] calldata listingIds, uint256 discountBps) external payable",
   "function getListingByToken(uint256 tokenId) external view returns (tuple(uint256 listingId, uint256 tokenId, address seller, uint256 price, uint8 listingType, uint8 status, uint256 startTime, uint256 endTime, uint256 createdAt))",
   "function getAuctionByToken(uint256 tokenId) external view returns (tuple(uint256 auctionId, uint256 tokenId, address seller, uint256 startingPrice, uint256 currentBid, address currentBidder, uint256 endTime, bool ended))",
   "function getTokenOffers(uint256 tokenId) external view returns (tuple(uint256 offerId, uint256 tokenId, address offerer, uint256 price, uint8 status, uint256 expiresAt, uint256 createdAt)[])",
@@ -26,6 +27,7 @@ const MARKETPLACE_ABI = [
   "event NFTPurchased(uint256 indexed listingId, uint256 indexed tokenId, address indexed seller, address buyer, uint256 price, uint256 platformFee, uint256 royaltyFee)",
   "event OfferCreated(uint256 indexed offerId, uint256 indexed tokenId, address indexed offerer, uint256 price)",
   "event OfferAccepted(uint256 indexed offerId, uint256 indexed tokenId, address indexed seller, address buyer, uint256 price)",
+  "event BundlePurchased(address indexed buyer, uint256[] tokenIds, uint256 totalPrice, uint256 discountAmount, uint256 platformFee)",
 ]
 
 const MARKETPLACE_ADDRESS = import.meta.env.VITE_MARKETPLACE_ADDRESS || ""
@@ -499,6 +501,65 @@ export function useMarketplace() {
     [provider]
   )
 
+  /**
+   * Purchase a bundle of NFTs
+   */
+  const purchaseBundle = useCallback(
+    async (
+      listingIds: number[],
+      discountBps: number = 1000,
+      totalPriceWei?: bigint
+    ): Promise<{ success: boolean; txHash?: string; error?: string }> => {
+      if (!isConnected || !account) {
+        return { success: false, error: "Wallet not connected" }
+      }
+
+      if (!MARKETPLACE_ADDRESS) {
+        return { success: false, error: "Marketplace contract not configured" }
+      }
+
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const contract = getMarketplaceContract()
+        if (!contract) {
+          throw new Error("Failed to connect to marketplace contract")
+        }
+
+        // If total price not provided, estimate (contract will validate)
+        const value = totalPriceWei || ethers.parseEther("0")
+
+        const tx = await contract.purchaseBundle(listingIds, discountBps, { value })
+        const receipt = await tx.wait()
+
+        // Find BundlePurchased event (for future use)
+        receipt.logs.find((log: any) => {
+          try {
+            const parsed = contract.interface.parseLog(log)
+            return parsed?.name === "BundlePurchased"
+          } catch {
+            return false
+          }
+        })
+
+        toast.success("Bundle purchased successfully!")
+        return {
+          success: true,
+          txHash: receipt.hash,
+        }
+      } catch (err: any) {
+        const errorMessage = err.message || "Failed to purchase bundle"
+        setError(errorMessage)
+        toast.error(errorMessage)
+        return { success: false, error: errorMessage }
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [isConnected, account, getMarketplaceContract]
+  )
+
   return {
     isLoading,
     error,
@@ -510,6 +571,7 @@ export function useMarketplace() {
     createOffer,
     acceptOffer,
     getListingByToken,
+    purchaseBundle,
   }
 }
 

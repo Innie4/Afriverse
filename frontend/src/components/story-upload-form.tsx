@@ -21,6 +21,7 @@ import { SuccessAnimation, TransactionAnimation } from "@/components/lottie-anim
 import { useWeb3 } from "@/hooks/useWeb3"
 import { motion, AnimatePresence } from "framer-motion"
 import { uploadFileToIPFS, uploadMetadataToIPFS, createStoryOffchain } from "@/services/api"
+import { createLazyMint } from "@/services/marketplaceApi"
 import { toast } from "sonner"
 import { AFRICAN_TRIBES } from "@/data/tribes"
 import { AFRICAN_LANGUAGES } from "@/data/languages"
@@ -160,6 +161,7 @@ export default function StoryUploadForm() {
   const [tokenId, setTokenId] = useState<string | null>(null)
   const [step, setStep] = useState<"form" | "uploading" | "minting" | "success">("form")
   const [showMetaMaskModal, setShowMetaMaskModal] = useState(false)
+  const [useLazyMinting, setUseLazyMinting] = useState(false)
 
   const expressionConfig = expressionDetails[formData.expressionType]
   const activeExpression = expressionOptions.find((option) => option.value === formData.expressionType)
@@ -562,6 +564,42 @@ export default function StoryUploadForm() {
 
       const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS || ""
       const contractConfigured = /^0x[a-fA-F0-9]{40}$/.test(contractAddress)
+
+      // Lazy minting: Create lazy mint instead of minting immediately
+      if (useLazyMinting && metadataCid && account) {
+        try {
+          await createLazyMint({
+            ipfsHash: metadataCid,
+            authorAddress: account,
+            tribe: formData.tribe,
+            language: formData.language,
+            metadata,
+          })
+          toast.success("Lazy mint created! Your NFT will be minted when someone purchases it.")
+          setStep("success")
+          setSuccess(true)
+          // Clear form
+          setFormData({
+            title: "",
+            author: "",
+            category: "",
+            description: "",
+            tags: "",
+            tribe: "",
+            language: "",
+            expressionType: "writer",
+          })
+          setChapters([createChapter(0)])
+          setImagePreview(null)
+          setSelectedGenres([])
+          return
+        } catch (lazyError: any) {
+          toast.error(lazyError.message || "Failed to create lazy mint")
+          setError(lazyError.message || "Failed to create lazy mint")
+          setStep("form")
+          return
+        }
+      }
 
       if (contractConfigured && isConnected && metadataCid) {
         setStep("minting")
@@ -1179,6 +1217,25 @@ export default function StoryUploadForm() {
           />
         </div>
 
+        {/* Lazy Minting Option */}
+        {isConnected && (
+          <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg border border-border">
+            <input
+              type="checkbox"
+              id="lazy-minting"
+              checked={useLazyMinting}
+              onChange={(e) => setUseLazyMinting(e.target.checked)}
+              className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <label htmlFor="lazy-minting" className="flex-1 cursor-pointer">
+              <p className="font-semibold text-sm">Use Lazy Minting</p>
+              <p className="text-xs text-muted-foreground">
+                Save gas fees by minting only when someone purchases your NFT. Your work will be listed but not minted until purchase.
+              </p>
+            </label>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={isLoading || !isConnected}
@@ -1192,7 +1249,7 @@ export default function StoryUploadForm() {
             </>
           ) : (
             <>
-              <Upload size={20} /> Mint Creative Work
+              <Upload size={20} /> {useLazyMinting ? "Create Lazy Mint" : "Mint Creative Work"}
             </>
           )}
         </button>

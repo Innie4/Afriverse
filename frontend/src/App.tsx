@@ -5,8 +5,7 @@ import { ErrorBoundary } from '@/components/error-boundary'
 import ScrollToTop from '@/components/scroll-to-top'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import Home from '@/pages/Home'
-import Gallery from '@/pages/Gallery'
-import Marketplace from '@/pages/Marketplace'
+import GalleryMarketplace from '@/pages/GalleryMarketplace'
 import Upload from '@/pages/Upload'
 import StoryDetail from '@/pages/StoryDetail'
 import MyStories from '@/pages/MyStories'
@@ -30,8 +29,8 @@ function App() {
           <AnimatePresence mode="wait">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/gallery" element={<GalleryMarketplace />} />
+              <Route path="/marketplace" element={<GalleryMarketplace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/story/:id" element={<StoryDetail />} />

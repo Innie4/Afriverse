@@ -398,3 +398,187 @@ export async function fetchUserNFTs(
   }
 }
 
+/**
+ * Record a bundle purchase
+ */
+export async function recordBundle(payload: {
+  bundleId: string
+  buyerAddress: string
+  listingIds: number[]
+  tokenIds: number[]
+  totalPriceWei: string
+  totalPriceMatic?: number
+  discountBps?: number
+  discountAmountWei?: string
+  discountAmountMatic?: number
+  platformFeeWei?: string
+  transactionHash: string
+  blockNumber?: number
+}): Promise<{ success: boolean; bundleId: number }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/marketplace/bundles`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(error.error || `Failed to record bundle: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error("Failed to record bundle:", error)
+    throw error
+  }
+}
+
+/**
+ * Fetch notifications for a user
+ */
+export async function fetchNotifications(
+  address: string,
+  options?: { limit?: number; unreadOnly?: boolean }
+): Promise<{ notifications: Notification[] }> {
+  try {
+    const params = new URLSearchParams()
+    if (options?.limit) params.append("limit", options.limit.toString())
+    if (options?.unreadOnly) params.append("unreadOnly", "true")
+
+    const response = await fetch(`${API_BASE_URL}/notifications/${address}?${params.toString()}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch notifications: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    console.warn("API fetch failed:", error)
+    return { notifications: [] }
+  }
+}
+
+/**
+ * Mark notification as read
+ */
+export async function markNotificationRead(
+  id: number,
+  address: string
+): Promise<{ success: boolean }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to mark notification as read: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error("Failed to mark notification as read:", error)
+    throw error
+  }
+}
+
+/**
+ * Mark all notifications as read
+ */
+export async function markAllNotificationsRead(address: string): Promise<{ success: boolean; count: number }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/notifications/${address}/read-all`, {
+      method: "PATCH",
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to mark all notifications as read: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error("Failed to mark all notifications as read:", error)
+    throw error
+  }
+}
+
+/**
+ * Get unread notification count
+ */
+export async function getUnreadNotificationCount(address: string): Promise<{ count: number }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/notifications/${address}/unread-count`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to get unread count: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    console.warn("API fetch failed:", error)
+    return { count: 0 }
+  }
+}
+
+/**
+ * Create a lazy mint
+ */
+export async function createLazyMint(payload: {
+  ipfsHash: string
+  authorAddress: string
+  tribe?: string
+  language?: string
+  metadata?: any
+}): Promise<{ success: boolean; lazyMint: any }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/lazy-mints`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(error.error || `Failed to create lazy mint: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error("Failed to create lazy mint:", error)
+    throw error
+  }
+}
+
+/**
+ * Get lazy mint by IPFS hash
+ */
+export async function getLazyMint(ipfsHash: string): Promise<any> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/lazy-mints/${ipfsHash}`)
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null
+      }
+      throw new Error(`Failed to fetch lazy mint: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    console.warn("API fetch failed:", error)
+    return null
+  }
+}
+
+export interface Notification {
+  id: number
+  type: string
+  title: string
+  message: string
+  data?: any
+  read: boolean
+  createdAt: string
+}
+

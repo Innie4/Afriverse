@@ -10,7 +10,11 @@ import { initDatabase, createTables } from "./config/database.js"
 import { initRedis } from "./config/cache.js"
 import { initIPFS } from "./services/ipfs.js"
 import { initEventListener, startEventListener } from "./services/eventListener.js"
+import { initMarketplaceEventListener, startMarketplaceEventListener } from "./services/marketplaceEventListener.js"
 import routes from "./routes/index.js"
+import swaggerUi from "swagger-ui-express"
+import { swaggerSpec } from "./config/swagger.js"
+import { seedDatabase } from "./scripts/seed.js"
 
 // Load environment variables explicitly from backend/.env regardless of cwd
 const __filename = fileURLToPath(import.meta.url)
@@ -46,6 +50,12 @@ const uploadLimiter = rateLimit({
 // Apply rate limiting to upload routes
 app.use("/api/upload", uploadLimiter)
 
+// Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: ".swagger-ui .topbar { display: none }",
+  customSiteTitle: "Afriverse Tales API Documentation",
+}))
+
 // Routes
 app.use("/api", routes)
 
@@ -54,11 +64,15 @@ app.get("/", (req, res) => {
   res.json({
     message: "Afriverse Tales Backend API",
     version: "1.0.0",
+    documentation: "/api-docs",
     endpoints: {
       stories: "/api/stories",
       storyById: "/api/stories/:id",
       upload: "/api/upload",
       health: "/api/health",
+      marketplace: "/api/marketplace",
+      notifications: "/api/notifications",
+      lazyMints: "/api/lazy-mints",
     },
   })
 })
@@ -96,6 +110,17 @@ async function initializeServices() {
     await createTables()
     logger.info("Database initialized")
 
+    // Seed database if enabled
+    if (process.env.SEED_DATABASE === "true") {
+      try {
+        logger.info("Seeding database...")
+        await seedDatabase()
+        logger.info("Database seeded successfully")
+      } catch (error) {
+        logger.warn("Database seeding failed:", error.message)
+      }
+    }
+
     // Initialize Redis (optional)
     await initRedis()
     logger.info("Redis initialized (if configured)")
@@ -114,6 +139,18 @@ async function initializeServices() {
       logger.info("Event listener started")
     } else {
       logger.warn("Event listener disabled or not started - check ENABLE_EVENT_LISTENER, RPC_URL, valid CONTRACT_ADDRESS")
+    }
+
+    // Initialize marketplace event listener for notifications
+    const enableMarketplaceListener = (process.env.ENABLE_MARKETPLACE_LISTENER || "true").toLowerCase() !== "false"
+    const validMarketplaceContract = /^0x[a-fA-F0-9]{40}$/.test(process.env.MARKETPLACE_CONTRACT_ADDRESS || "")
+    if (enableMarketplaceListener && process.env.RPC_URL && validMarketplaceContract) {
+      initMarketplaceEventListener()
+      logger.info("Marketplace event listener initialized")
+      await startMarketplaceEventListener()
+      logger.info("Marketplace event listener started")
+    } else {
+      logger.warn("Marketplace event listener disabled - check ENABLE_MARKETPLACE_LISTENER, RPC_URL, valid MARKETPLACE_CONTRACT_ADDRESS")
     }
 
     logger.info("All services initialized successfully")
