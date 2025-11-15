@@ -3,6 +3,19 @@ import express from "express"
 import multer from "multer"
 import { getStories, getStoryById, getStoryStats, createStory } from "../controllers/storyController.js"
 import { uploadFile, uploadMetadata, healthCheck } from "../controllers/uploadController.js"
+import {
+  getListings,
+  getListingById,
+  createListing,
+  updateListingStatus,
+  recordSale,
+  getSales,
+  getOffers,
+  createOffer,
+  updateOfferStatus,
+  getPriceHistory,
+  getUserNFTs,
+} from "../controllers/marketplaceController.js"
 import logger from "../config/logger.js"
 
 const router = express.Router()
@@ -31,6 +44,19 @@ router.post("/stories", createStory)
 // Upload routes
 router.post("/upload", upload.single("file"), uploadFile)
 router.post("/upload/metadata", uploadMetadata)
+
+// Marketplace routes
+router.get("/marketplace/listings", getListings)
+router.get("/marketplace/listings/:id", getListingById)
+router.post("/marketplace/listings", createListing)
+router.patch("/marketplace/listings/:id/status", updateListingStatus)
+router.post("/marketplace/sales", recordSale)
+router.get("/marketplace/sales", getSales)
+router.get("/marketplace/offers/:tokenId", getOffers)
+router.post("/marketplace/offers", createOffer)
+router.patch("/marketplace/offers/:id/status", updateOfferStatus)
+router.get("/marketplace/price-history/:tokenId", getPriceHistory)
+router.get("/marketplace/users/:address/nfts", getUserNFTs)
 
 // Error handling middleware for routes
 router.use((err, req, res, next) => {

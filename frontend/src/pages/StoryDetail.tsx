@@ -1,15 +1,22 @@
 import { useState, useEffect, useMemo } from "react"
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom"
 import StoryCard from "@/components/story-card"
-import { Heart, Share2, Bookmark, Eye, Calendar, User } from "lucide-react"
+import { Heart, Share2, Bookmark, Eye, Calendar, User, Tag, ShoppingCart } from "lucide-react"
 import Footer from "@/components/footer"
 import Navbar from "@/components/navbar"
 import ChapterSidebar from "@/components/chapter-sidebar"
 import { fetchStoryById, fetchStories, type Story } from "@/services/api"
+import { fetchListingByToken, type Listing } from "@/services/marketplaceApi"
 import { StoryDetailSkeleton } from "@/components/skeleton"
 import { toast } from "sonner"
 import DOMPurify from "dompurify"
 import { marked } from "marked"
+import ListingForm from "@/components/listing-form"
+import PurchaseModal from "@/components/purchase-modal"
+import MakeOfferModal from "@/components/make-offer-modal"
+import OfferList from "@/components/offer-list"
+import PriceChart from "@/components/price-chart"
+import { useWeb3 } from "@/hooks/useWeb3"
 
 const stripHtmlText = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 
@@ -34,6 +41,12 @@ export default function StoryDetail() {
   const [likeCount, setLikeCount] = useState(0)
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showShareMenu, setShowShareMenu] = useState(false)
+  const [listing, setListing] = useState<Listing | null>(null)
+  const [showListingForm, setShowListingForm] = useState(false)
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false)
+  const [showOfferModal, setShowOfferModal] = useState(false)
+  const [showOffers, setShowOffers] = useState(false)
+  const { account, isConnected } = useWeb3()
 
   useEffect(() => {
     const loadStory = async () => {
@@ -55,6 +68,17 @@ export default function StoryDetail() {
         }
         
         setStory(storyData)
+        
+        // Load marketplace listing if exists
+        try {
+          const listingData = await fetchListingByToken(tokenId)
+          if (listingData && listingData.status === "active") {
+            setListing(listingData)
+          }
+        } catch (listingErr) {
+          // No listing found or error - continue without listing
+          console.warn("No active listing found:", listingErr)
+        }
         
         // Load related stories (same tribe or language)
         try {
@@ -220,8 +244,62 @@ export default function StoryDetail() {
               </div>
             </div>
 
+            {/* Marketplace Section */}
+            {listing && listing.status === "active" && (
+              <div className="mb-6 p-4 bg-accent/10 border border-accent/20 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Listed for Sale</p>
+                    <p className="text-2xl font-bold text-foreground">{listing.priceMatic.toFixed(4)} MATIC</p>
+                  </div>
+                  {isConnected && account?.toLowerCase() !== listing.seller.toLowerCase() && (
+                    <button
+                      onClick={() => setShowPurchaseModal(true)}
+                      className="px-6 py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:bg-accent/90 transition-colors flex items-center gap-2"
+                    >
+                      <ShoppingCart size={20} />
+                      Buy Now
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3">
+              {/* List for Sale Button (if owner and not listed) */}
+              {isConnected && account?.toLowerCase() === story.author.toLowerCase() && !listing && (
+                <button
+                  onClick={() => setShowListingForm(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 ease-out hover:shadow-md hover:scale-105 active:scale-95"
+                >
+                  <Tag size={20} />
+                  <span>List for Sale</span>
+                </button>
+              )}
+
+              {/* Make Offer Button (if not owner and not listed) */}
+              {isConnected && account?.toLowerCase() !== story.author.toLowerCase() && !listing && (
+                <button
+                  onClick={() => setShowOfferModal(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-out hover:shadow-md hover:scale-105 active:scale-95"
+                >
+                  <Tag size={20} />
+                  <span>Make Offer</span>
+                </button>
+              )}
+
+              {/* View Offers Button (if owner) */}
+              {isConnected && account?.toLowerCase() === story.author.toLowerCase() && (
+                <button
+                  onClick={() => setShowOffers(!showOffers)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/80 hover:bg-muted text-foreground transition-all duration-300 ease-out hover:shadow-md hover:scale-105 active:scale-95"
+                >
+                  <Tag size={20} />
+                  <span>View Offers</span>
+                </button>
+              )}
+
               <button
                 onClick={handleLike}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 ease-out ${
@@ -334,6 +412,22 @@ export default function StoryDetail() {
             )}
           </div>
 
+          {/* Offers Section */}
+          {showOffers && isConnected && account?.toLowerCase() === story.author.toLowerCase() && (
+            <div className="mb-12 pb-12 border-b border-border">
+              <h3 className="font-semibold mb-4">Pending Offers</h3>
+              <OfferList tokenId={parseInt(id || "0")} ownerAddress={story.author} />
+            </div>
+          )}
+
+          {/* Price History */}
+          {id && (
+            <div className="mb-12 pb-12 border-b border-border">
+              <h3 className="font-semibold mb-4">Price History</h3>
+              <PriceChart tokenId={parseInt(id)} />
+            </div>
+          )}
+
           {/* Tags */}
           {tags.length > 1 && (
             <div className="mb-12 pb-12 border-b border-border">
@@ -382,6 +476,59 @@ export default function StoryDetail() {
       )}
 
       <Footer />
+
+      {/* Modals */}
+      {showListingForm && id && (
+        <ListingForm
+          tokenId={parseInt(id)}
+          onClose={() => setShowListingForm(false)}
+          onSuccess={() => {
+            // Reload listing data
+            if (id) {
+              fetchListingByToken(parseInt(id))
+                .then((listingData) => {
+                  if (listingData && listingData.status === "active") {
+                    setListing(listingData)
+                  }
+                })
+                .catch(() => {})
+            }
+          }}
+        />
+      )}
+
+      {showPurchaseModal && listing && (
+        <PurchaseModal
+          listing={listing}
+          onClose={() => setShowPurchaseModal(false)}
+          onSuccess={() => {
+            // Reload listing data
+            setListing(null)
+            if (id) {
+              fetchListingByToken(parseInt(id))
+                .then((listingData) => {
+                  if (listingData && listingData.status === "active") {
+                    setListing(listingData)
+                  }
+                })
+                .catch(() => {})
+            }
+          }}
+        />
+      )}
+
+      {showOfferModal && id && (
+        <MakeOfferModal
+          tokenId={parseInt(id)}
+          onClose={() => setShowOfferModal(false)}
+          onSuccess={() => {
+            // Optionally reload offers
+            if (showOffers) {
+              // Offers will reload automatically
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -56,6 +56,75 @@ export async function createTables() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS listings (
+      id SERIAL PRIMARY KEY,
+      listing_id INTEGER UNIQUE NOT NULL,
+      token_id INTEGER NOT NULL REFERENCES stories(token_id),
+      seller_address VARCHAR(255) NOT NULL,
+      price_wei BIGINT NOT NULL,
+      price_matic NUMERIC(20, 8),
+      currency VARCHAR(10) DEFAULT 'MATIC',
+      listing_type VARCHAR(20) DEFAULT 'fixed',
+      status VARCHAR(20) DEFAULT 'active',
+      start_time TIMESTAMP,
+      end_time TIMESTAMP,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS sales (
+      id SERIAL PRIMARY KEY,
+      token_id INTEGER NOT NULL,
+      listing_id INTEGER,
+      seller_address VARCHAR(255) NOT NULL,
+      buyer_address VARCHAR(255) NOT NULL,
+      price_wei BIGINT NOT NULL,
+      price_matic NUMERIC(20, 8),
+      platform_fee_wei BIGINT NOT NULL,
+      royalty_wei BIGINT NOT NULL,
+      transaction_hash VARCHAR(255) NOT NULL,
+      block_number INTEGER,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS offers (
+      id SERIAL PRIMARY KEY,
+      offer_id INTEGER UNIQUE NOT NULL,
+      token_id INTEGER NOT NULL REFERENCES stories(token_id),
+      offerer_address VARCHAR(255) NOT NULL,
+      price_wei BIGINT NOT NULL,
+      price_matic NUMERIC(20, 8),
+      status VARCHAR(20) DEFAULT 'pending',
+      expires_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS auctions (
+      id SERIAL PRIMARY KEY,
+      auction_id INTEGER UNIQUE NOT NULL,
+      token_id INTEGER NOT NULL REFERENCES stories(token_id),
+      listing_id INTEGER REFERENCES listings(listing_id),
+      seller_address VARCHAR(255) NOT NULL,
+      starting_price_wei BIGINT NOT NULL,
+      current_bid_wei BIGINT DEFAULT 0,
+      current_bidder_address VARCHAR(255),
+      end_time TIMESTAMP NOT NULL,
+      ended BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS price_history (
+      id SERIAL PRIMARY KEY,
+      token_id INTEGER NOT NULL REFERENCES stories(token_id),
+      price_wei BIGINT NOT NULL,
+      price_matic NUMERIC(20, 8),
+      transaction_hash VARCHAR(255),
+      event_type VARCHAR(50),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
   `
 
   const indexQueries = [
@@ -64,6 +133,18 @@ export async function createTables() {
     "CREATE INDEX IF NOT EXISTS idx_tribe ON stories(tribe)",
     "CREATE INDEX IF NOT EXISTS idx_language ON stories(language)",
     "CREATE INDEX IF NOT EXISTS idx_created_at ON stories(created_at)",
+    "CREATE INDEX IF NOT EXISTS idx_listings_token_id ON listings(token_id)",
+    "CREATE INDEX IF NOT EXISTS idx_listings_seller ON listings(seller_address)",
+    "CREATE INDEX IF NOT EXISTS idx_listings_status ON listings(status)",
+    "CREATE INDEX IF NOT EXISTS idx_sales_token_id ON sales(token_id)",
+    "CREATE INDEX IF NOT EXISTS idx_sales_buyer ON sales(buyer_address)",
+    "CREATE INDEX IF NOT EXISTS idx_sales_seller ON sales(seller_address)",
+    "CREATE INDEX IF NOT EXISTS idx_offers_token_id ON offers(token_id)",
+    "CREATE INDEX IF NOT EXISTS idx_offers_offerer ON offers(offerer_address)",
+    "CREATE INDEX IF NOT EXISTS idx_offers_status ON offers(status)",
+    "CREATE INDEX IF NOT EXISTS idx_auctions_token_id ON auctions(token_id)",
+    "CREATE INDEX IF NOT EXISTS idx_auctions_seller ON auctions(seller_address)",
+    "CREATE INDEX IF NOT EXISTS idx_price_history_token_id ON price_history(token_id)",
   ]
 
   try {

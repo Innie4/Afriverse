@@ -12,12 +12,14 @@ export default function Navbar() {
   const unauthenticatedLinks = [
     { href: "/", label: "Home" },
     { href: "/gallery", label: "Gallery" },
+    { href: "/marketplace", label: "Marketplace" },
     { href: "/about", label: "About" },
   ]
 
   const authenticatedLinks = [
     { href: "/", label: "Home" },
     { href: "/gallery", label: "Gallery" },
+    { href: "/marketplace", label: "Marketplace" },
     { href: "/upload", label: "Upload" },
     { href: "/my-stories", label: "My Stories" },
     { href: "/about", label: "About" },

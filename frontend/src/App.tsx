@@ -6,6 +6,7 @@ import ScrollToTop from '@/components/scroll-to-top'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import Home from '@/pages/Home'
 import Gallery from '@/pages/Gallery'
+import Marketplace from '@/pages/Marketplace'
 import Upload from '@/pages/Upload'
 import StoryDetail from '@/pages/StoryDetail'
 import MyStories from '@/pages/MyStories'
@@ -30,6 +31,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/gallery" element={<Gallery />} />
+              <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/story/:id" element={<StoryDetail />} />
