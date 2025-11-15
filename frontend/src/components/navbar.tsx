@@ -58,7 +58,7 @@ export default function Navbar() {
           <div className="flex items-center h-16 gap-3 sm:gap-4">
             {/* Mobile Menu Button */}
             <button
-              className="order-1 md:hidden p-2.5 hover:bg-muted/80 rounded-xl transition-all duration-300 ease-out active:scale-95"
+              className="order-1 max-[1199px]:block min-[1200px]:hidden p-2.5 hover:bg-muted/80 rounded-xl transition-all duration-300 ease-out active:scale-95"
               onClick={toggleMenu}
               aria-expanded={isOpen}
               aria-controls="mobile-navigation"
@@ -83,7 +83,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="order-4 md:order-2 hidden md:flex items-center gap-8 ml-auto">
+            <div className="order-4 md:order-2 hidden min-[1200px]:flex items-center gap-8 ml-auto">
               {links.map((link) => (
                 <Link
                   key={link.href}
@@ -97,7 +97,7 @@ export default function Navbar() {
             </div>
 
             {/* Auth Buttons */}
-            <div className="order-5 md:order-3 hidden md:flex items-center gap-3 md:ml-6">
+            <div className="order-5 md:order-3 hidden min-[1200px]:flex items-center gap-3 md:ml-6">
               {isAuthenticated ? (
                 <>
                   <Link
@@ -144,7 +144,7 @@ export default function Navbar() {
 
       {/* Mobile Navigation Overlay */}
       <div
-        className={`md:hidden fixed inset-0 z-50 transition-opacity duration-300 ease-out ${
+        className={`max-[1199px]:block min-[1200px]:hidden fixed inset-0 z-50 transition-opacity duration-300 ease-out ${
           isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
         aria-hidden={!isOpen}
