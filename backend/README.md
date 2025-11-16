@@ -6,185 +6,146 @@ Node.js backend API for Afriverse Tales - Web3 story indexer and IPFS manager.
 
 - 🚀 **Express.js REST API** with clean architecture
 - 📦 **IPFS Integration** via web3.storage for decentralized file storage
-- 📦 **IPFS Integration** via Web3.Storage with Pinata/NFT.Storage fallbacks
 - ⛓️ **Web3 Event Listener** using Ethers.js to listen for StoryMinted events
-- 🗄️ **PostgreSQL/Supabase** database for story metadata
+- 🗄️ **Supabase Database** - Managed PostgreSQL (no local installation needed!)
 - 💾 **Redis Caching** (optional) for faster API responses
 - 📝 **Winston Logging** for production-ready logging
 - 🛡️ **Rate Limiting** for upload endpoints
 - 🔒 **Error Handling** middleware for robust error management
+- 📚 **Swagger UI** for API documentation
 
 ## Prerequisites
 
-- Node.js 18+ 
-- PostgreSQL database (or Supabase)
-- Redis (optional, for caching)
-- Web3.storage API token
+- Node.js 18+
+- Supabase account (free tier available)
+- Web3.storage API token (optional)
 - Ethereum RPC URL (Infura, Alchemy, etc.)
 - Smart contract address
 
-## Installation
+## Quick Setup
 
-1. **Install dependencies:**
+### 1. Create Supabase Project
+
+1. Go to [supabase.com](https://supabase.com) and sign up
+2. Create a new project
+3. Get your connection string from: **Settings → Database → Connection string (URI)**
+
+### 2. Install Dependencies
+
 ```bash
 cd backend
 npm install
 ```
 
-2. **Set up environment variables:**
+### 3. Configure Environment
+
 ```bash
-cp .env.example .env
+npm run create-env
 ```
 
-Edit `.env` and fill in your configuration:
-- `DATABASE_URL` - PostgreSQL connection string
-- `RPC_URL` - Ethereum RPC endpoint
-- `CONTRACT_ADDRESS` - Your smart contract address
-- `PRIVATE_KEY` - Private key for event listener (optional)
-- `WEB3_STORAGE_TOKEN` - Web3.storage API token
-- `PINATA_API_KEY` and `PINATA_SECRET_KEY` - Pinata API credentials (optional)
-- `NFT_STORAGE_TOKEN` - NFT.Storage API token (optional)
-- `REDIS_URL` - Redis connection string (optional)
-
-3. **Start the server:**
-```bash
-npm start
+Then edit `.env` and add your Supabase connection string:
+```env
+DATABASE_URL=postgresql://postgres.[PROJECT-REF]:YOUR_PASSWORD@aws-0-[REGION].pooler.supabase.com:6543/postgres
+USE_SUPABASE=true
 ```
 
-For development with auto-reload:
+### 4. Setup Database
+
 ```bash
-npm run dev
+npm run setup-db    # Creates all tables
+npm run seed        # Seeds sample data
+```
+
+Or run both:
+```bash
+npm run setup
+```
+
+### 5. Start Server
+
+```bash
+npm run dev    # Development mode with auto-reload
+# or
+npm start     # Production mode
+```
+
+## Documentation
+
+- **Quick Start:** See `QUICKSTART.md`
+- **Supabase Setup:** See `SUPABASE_SETUP.md` (detailed guide)
+- **Full Setup:** See `SETUP.md`
+- **API Docs:** http://localhost:3001/api-docs (when server is running)
+
+## Available Scripts
+
+```bash
+npm run create-env      # Create .env file
+npm run setup-db        # Create database tables
+npm run seed            # Seed sample data
+npm run setup           # Full setup (env + db + seed)
+npm run dev             # Start development server
+npm start               # Start production server
 ```
 
 ## API Endpoints
 
-### GET `/api/stories`
-Get all stories with optional filters.
-
-**Query Parameters:**
-- `tribe` - Filter by tribe
-- `language` - Filter by language  
-- `author` - Filter by author address
-- `page` - Page number (default: 1)
-- `limit` - Items per page (default: 20)
-
-**Example:**
-```bash
-GET /api/stories?tribe=Yoruba&language=en&page=1&limit=10
+### Health Check
+```
+GET /api/health
 ```
 
-**Response:**
-```json
-{
-  "stories": [
-    {
-      "id": 1,
-      "tokenId": 123,
-      "ipfsHash": "Qm...",
-      "ipfsUrl": "https://ipfs.io/ipfs/Qm...",
-      "author": "0x...",
-      "tribe": "Yoruba",
-      "language": "en",
-      "title": "Story Title",
-      "description": "Story description",
-      "metadata": {...},
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 10,
-    "total": 25
-  }
-}
+### Stories
+```
+GET    /api/stories              # Get all stories
+GET    /api/stories/:id          # Get story by token ID
+GET    /api/stories/stats        # Get story statistics
+POST   /api/stories              # Create story (off-chain)
 ```
 
-### GET `/api/stories/:id`
-Get story by token ID.
-
-**Example:**
-```bash
-GET /api/stories/123
+### Marketplace
+```
+GET    /api/marketplace/listings              # Get all listings
+GET    /api/marketplace/listings/:id          # Get listing by ID
+POST   /api/marketplace/listings              # Create listing
+PATCH  /api/marketplace/listings/:id/status   # Update listing status
+POST   /api/marketplace/sales                 # Record sale
+GET    /api/marketplace/sales                 # Get sales history
+GET    /api/marketplace/offers/:tokenId       # Get offers
+POST   /api/marketplace/offers                # Create offer
+GET    /api/marketplace/price-history/:tokenId # Get price history
+GET    /api/marketplace/users/:address/nfts   # Get user's NFTs
 ```
 
-### GET `/api/stories/stats`
-Get story statistics.
-
-**Response:**
-```json
-{
-  "total": 100,
-  "byTribe": [
-    {"tribe": "Yoruba", "count": 45},
-    {"tribe": "Igbo", "count": 30}
-  ],
-  "byLanguage": [
-    {"language": "en", "count": 60},
-    {"language": "sw", "count": 40}
-  ]
-}
+### Upload
+```
+POST   /api/upload              # Upload file to IPFS
+POST   /api/upload/metadata     # Upload JSON metadata to IPFS
 ```
 
-### POST `/api/upload`
-Upload file to IPFS.
-
-**Request:**
-- Content-Type: `multipart/form-data`
-- Body: `file` (file upload)
-
-**Example:**
-```bash
-curl -X POST http://localhost:3001/api/upload \
-  -F "file=@story.jpg"
+### Notifications
+```
+GET    /api/notifications/:address           # Get notifications
+PATCH  /api/notifications/:id/read           # Mark as read
+PATCH  /api/notifications/:address/read-all  # Mark all as read
+GET    /api/notifications/:address/unread-count # Get unread count
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "cid": "Qm...",
-  "ipfsUrl": "https://ipfs.io/ipfs/Qm...",
-  "filename": "story.jpg"
-}
-```
-
-### POST `/api/upload/metadata`
-Upload JSON metadata to IPFS.
-
-**Request:**
-```json
-{
-  "metadata": {
-    "name": "Story Title",
-    "description": "Story description",
-    "image": "ipfs://Qm...",
-    "attributes": [...]
-  }
-}
-```
-
-### GET `/api/health`
-Health check endpoint.
+See Swagger UI at `/api-docs` for complete API documentation.
 
 ## Database Schema
 
-The backend automatically creates the following table:
-
-```sql
-CREATE TABLE stories (
-  id SERIAL PRIMARY KEY,
-  token_id INTEGER UNIQUE NOT NULL,
-  ipfs_hash VARCHAR(255) NOT NULL,
-  author VARCHAR(255) NOT NULL,
-  tribe VARCHAR(100),
-  language VARCHAR(50),
-  title VARCHAR(500),
-  description TEXT,
-  metadata JSONB,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+The backend automatically creates these tables in Supabase:
+- `stories` - Story/NFT metadata
+- `listings` - Marketplace listings
+- `sales` - Sales history
+- `offers` - Offers on NFTs
+- `bundles` - Bundle purchases
+- `notifications` - User notifications
+- `licenses` - License presets
+- `releases` - Compliance releases
+- `provenance` - Content provenance
+- `lazy_mints` - Lazy minting records
+- And more...
 
 ## Event Listener
 
@@ -201,94 +162,89 @@ event StoryMinted(
 );
 ```
 
-When an event is detected:
-1. Event data is extracted
-2. Metadata is fetched from IPFS (if available)
-3. Story is stored in PostgreSQL
-4. Cache is invalidated
+Configure in `.env`:
+```env
+RPC_URL=https://polygon-rpc.com
+CONTRACT_ADDRESS=0xYourContractAddress
+ENABLE_EVENT_LISTENER=true
+```
 
-## Caching
+## Architecture
 
-If Redis is configured, the following endpoints are cached:
-- `GET /api/stories` - Cached for 5 minutes
-- `GET /api/stories/:id` - Cached for 10 minutes
-- `GET /api/stories/stats` - Cached for 10 minutes
+### SOLID Principles Applied
 
-## Rate Limiting
+- **Single Responsibility:** Each controller handles one resource
+- **Open/Closed:** Easy to extend with new modules
+- **Liskov Substitution:** Consistent response handlers
+- **Interface Segregation:** Focused service interfaces
+- **Dependency Inversion:** Database abstraction layer
 
-Upload endpoints are rate-limited:
-- **Window:** 15 minutes (configurable)
-- **Max Requests:** 10 per window (configurable)
+### DRY (Don't Repeat Yourself)
 
-## Logging
-
-Logs are written to:
-- `logs/combined.log` - All logs
-- `logs/error.log` - Error logs only
-- Console output (with colors in development)
-
-## Deployment
-
-### Railway
-
-1. Connect your GitHub repository
-2. Add environment variables in Railway dashboard
-3. Deploy!
-
-### Render
-
-1. Create a new Web Service
-2. Connect your repository
-3. Set build command: `cd backend && npm install`
-4. Set start command: `cd backend && npm start`
-5. Add environment variables
-
-### Environment Variables for Production
-
-Make sure to set:
-- `NODE_ENV=production`
-- `DATABASE_URL` - Production database
-- `RPC_URL` - Production RPC endpoint
-- `CONTRACT_ADDRESS` - Deployed contract address
-- `WEB3_STORAGE_TOKEN` - Your API token
-- `REDIS_URL` - Production Redis (if using)
+- Centralized response handlers (`sendSuccess`, `sendError`, etc.)
+- `asyncHandler` wrapper for error handling
+- Reusable database query functions
+- Shared utility functions
 
 ## Project Structure
 
 ```
 backend/
 ├── src/
-│   ├── config/
-│   │   ├── database.js      # PostgreSQL connection
-│   │   ├── logger.js         # Winston logger
-│   │   └── cache.js          # Redis cache
-│   ├── services/
-│   │   ├── ipfs.js          # IPFS upload service
-│   │   └── eventListener.js  # Ethers.js event listener
-│   ├── controllers/
-│   │   ├── storyController.js
-│   │   └── uploadController.js
-│   ├── routes/
-│   │   └── index.js         # Express routes
-│   └── index.js             # Main application
-├── logs/                    # Log files (auto-created)
-├── .env.example
-├── package.json
-└── README.md
+│   ├── config/          # Configuration (database, swagger, logger)
+│   ├── controllers/      # Request handlers (SOLID/DRY principles)
+│   ├── services/         # Business logic
+│   ├── routes/           # API routes
+│   ├── scripts/          # Setup and seed scripts
+│   └── utils/            # Utility functions
+├── scripts/              # Setup scripts
+├── .env                  # Environment variables
+└── package.json          # Dependencies and scripts
 ```
+
+## Troubleshooting
+
+### Supabase Connection Issues
+
+**Error: `ENOTFOUND` or `ETIMEDOUT`**
+- Check your internet connection
+- Verify connection string is correct
+- Check if Supabase project is paused (restore in dashboard)
+
+**Error: `28P01` (Authentication failed)**
+- Verify password in connection string
+- Reset password in Supabase Dashboard if needed
+
+**Error: SSL required**
+- Ensure `USE_SUPABASE=true` is in `.env`
+- Code automatically handles SSL for Supabase
+
+### Port Already in Use
+
+Change port in `.env`:
+```
+PORT=3002
+```
+
+## Production Deployment
+
+1. Set `NODE_ENV=production` in `.env`
+2. Use production Supabase project
+3. Set secure `DATABASE_URL` with proper credentials
+4. Configure proper `RPC_URL` for your blockchain network
+5. Set `CONTRACT_ADDRESS` and `MARKETPLACE_CONTRACT_ADDRESS`
+6. Configure Redis for caching (optional but recommended)
+7. Set up proper logging and monitoring
+
+## Support
+
+For issues:
+1. Check `QUICKSTART.md` for quick setup
+2. Check `SUPABASE_SETUP.md` for database setup
+3. Check error logs in `logs/` directory
+4. Verify `.env` configuration
+5. Check Swagger docs at `/api-docs` for API details
 
 ## License
 
 ISC
-## IPFS Provider Setup
-
-Set one or more of the following in `backend/.env`:
-- `WEB3_STORAGE_TOKEN` (recommended)
-- `PINATA_API_KEY` + `PINATA_SECRET_KEY` (fallback)
-- `NFT_STORAGE_TOKEN` (fallback)
-
-You can customize the gateway used to display IPFS content with:
-- `IPFS_GATEWAY_URL` (default `https://ipfs.io/ipfs/`)
-
-If no provider is configured, the server will start and log a warning. Upload endpoints will return errors until a provider is set.
-

@@ -29,6 +29,11 @@ import {
   markLazyMintMinted,
   getUserLazyMints,
 } from "../controllers/lazyMintController.js"
+import { createLicensePreset, listLicensePresets, attachLicenseToStory } from "../controllers/licenseController.js"
+import { addReleases, getCompliance, registerManifest } from "../controllers/complianceController.js"
+import { listPurchases, getDownloadLink, verifyDownload } from "../controllers/deliveryController.js"
+import { createRequest, listRequests, updateRequestStatus } from "../controllers/requestController.js"
+import { getAdminMetrics } from "../controllers/metricsController.js"
 import logger from "../config/logger.js"
 
 const router = express.Router()
@@ -57,6 +62,16 @@ router.post("/stories", createStory)
 // Upload routes
 router.post("/upload", upload.single("file"), uploadFile)
 router.post("/upload/metadata", uploadMetadata)
+
+// Licensing routes
+router.post("/licenses", createLicensePreset)
+router.get("/licenses", listLicensePresets)
+router.post("/datasets/:tokenId/license", attachLicenseToStory)
+
+// Compliance routes
+router.post("/datasets/:tokenId/releases", addReleases)
+router.get("/datasets/:tokenId/compliance", getCompliance)
+router.post("/datasets/:tokenId/register", registerManifest)
 
 // Marketplace routes
 router.get("/marketplace/listings", getListings)
@@ -87,6 +102,19 @@ router.post("/lazy-mints", createLazyMint)
 router.get("/lazy-mints/:ipfsHash", getLazyMint)
 router.patch("/lazy-mints/:ipfsHash/minted", markLazyMintMinted)
 router.get("/lazy-mints/users/:address", getUserLazyMints)
+
+// Delivery / purchases routes
+router.get("/purchases/:address", listPurchases)
+router.get("/purchases/:address/:tokenId/download", getDownloadLink)
+router.get("/downloads/verify", verifyDownload)
+
+// Requests routes
+router.post("/requests", createRequest)
+router.get("/requests", listRequests)
+router.patch("/requests/:id/status", updateRequestStatus)
+
+// Admin metrics
+router.get("/admin/metrics", getAdminMetrics)
 
 // Error handling middleware for routes
 router.use((err, req, res, next) => {

@@ -11,6 +11,7 @@ export interface Story {
   author: string
   tribe: string
   language: string
+  vertical?: string
   title: string | null
   description: string | null
   metadata: any
@@ -47,6 +48,7 @@ export async function fetchStories(params?: {
   tribe?: string
   language?: string
   author?: string
+  vertical?: string
   page?: number
   limit?: number
 }): Promise<StoriesResponse> {
@@ -55,6 +57,7 @@ export async function fetchStories(params?: {
     if (params?.tribe) queryParams.append("tribe", params.tribe)
     if (params?.language) queryParams.append("language", params.language)
     if (params?.author) queryParams.append("author", params.author)
+    if (params?.vertical) queryParams.append("vertical", params.vertical)
     if (params?.page) queryParams.append("page", params.page.toString())
     if (params?.limit) queryParams.append("limit", params.limit.toString())
 
@@ -180,6 +183,7 @@ export async function createStoryOffchain(payload: {
   author: string
   tribe?: string
   language?: string
+  vertical?: string
   title?: string
   description?: string
   metadata?: Record<string, any>

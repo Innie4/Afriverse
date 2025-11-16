@@ -27,6 +27,11 @@ function buildStoryQuery(filters) {
     params.push(filters.author)
   }
 
+  if (filters.vertical) {
+    queryText += ` AND vertical = $${paramIndex++}`
+    params.push(filters.vertical)
+  }
+
   queryText += " ORDER BY created_at DESC"
 
   if (filters.pagination) {
@@ -50,6 +55,7 @@ function formatStory(story) {
     author: story.author,
     tribe: story.tribe,
     language: story.language,
+    vertical: story.vertical,
     title: story.title,
     description: story.description,
     metadata: story.metadata,
@@ -62,10 +68,10 @@ function formatStory(story) {
  * Get all stories with filters
  */
 export async function getAllStories(filters = {}) {
-  const { tribe, language, author, page = 1, limit = 20 } = filters
+  const { tribe, language, author, vertical, page = 1, limit = 20 } = filters
 
   // Build cache key
-  const cacheKey = `stories:${tribe || "all"}:${language || "all"}:${author || "all"}:${page}:${limit}`
+  const cacheKey = `stories:${tribe || "all"}:${language || "all"}:${author || "all"}:${vertical || "all"}:${page}:${limit}`
 
   // Try cache first
   const cached = await getCached(cacheKey)
@@ -79,6 +85,7 @@ export async function getAllStories(filters = {}) {
     tribe,
     language,
     author,
+    vertical,
     pagination: { page: parseInt(page), limit: parseInt(limit) },
   })
 
@@ -159,7 +166,7 @@ export async function getStoryStatistics() {
  * Create a new story
  */
 export async function createStory(storyData) {
-  const { ipfsHash, author, tribe, language, title, description, metadata } = storyData
+  const { ipfsHash, author, tribe, language, vertical, title, description, metadata } = storyData
 
   if (!ipfsHash || !author) {
     throw new Error("IPFS hash and author are required")
@@ -170,10 +177,10 @@ export async function createStory(storyData) {
   const nextTokenId = parseInt(maxResult.rows[0].next_id)
 
   const result = await query(
-    `INSERT INTO stories (token_id, ipfs_hash, author, tribe, language, title, description, metadata, created_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+    `INSERT INTO stories (token_id, ipfs_hash, author, tribe, language, vertical, title, description, metadata, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
      RETURNING *`,
-    [nextTokenId, ipfsHash, author, tribe || null, language || null, title || null, description || null, metadata ? JSON.stringify(metadata) : null]
+    [nextTokenId, ipfsHash, author, tribe || null, language || null, vertical || null, title || null, description || null, metadata ? JSON.stringify(metadata) : null]
   )
 
   return formatStory(result.rows[0])

@@ -8,7 +8,11 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "check-config": "node scripts/check-config.js",
+    "create-env": "node scripts/create-env.js",
+    "test-connection": "node scripts/test-supabase-connection.js",
+    "setup-db": "node src/scripts/setup-database.js",
     "seed": "node src/scripts/seed-db.js",
+    "setup": "npm run create-env && npm run setup-db && npm run seed",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

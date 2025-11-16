@@ -1,6 +1,8 @@
 // Upload controller - handles IPFS uploads
 import { uploadToIPFS, uploadMetadataToIPFS, getIPFSGatewayURL } from "../services/ipfs.js"
 import logger from "../config/logger.js"
+import { query } from "../config/database.js"
+import crypto from "crypto"
 
 /**
  * Upload file to IPFS
@@ -12,6 +14,7 @@ export async function uploadFile(req, res, next) {
     }
 
     let file, filename
+    const vertical = (req.body.vertical || "").toString() || null
 
     if (req.file) {
       // File uploaded via multer
@@ -28,11 +31,19 @@ export async function uploadFile(req, res, next) {
 
     logger.info(`File uploaded successfully: ${cid}`)
 
+    // Enqueue processing job
+    const jobId = crypto.randomBytes(12).toString("hex")
+    await query(
+      `INSERT INTO processing_jobs (job_id, status, input_cid, vertical) VALUES ($1, 'queued', $2, $3)`,
+      [jobId, cid, vertical]
+    )
+
     res.json({
       success: true,
       cid,
       ipfsUrl: getIPFSGatewayURL(cid),
       filename,
+      jobId,
     })
   } catch (error) {
     logger.error("Error uploading file", error)

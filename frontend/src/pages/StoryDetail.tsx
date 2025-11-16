@@ -18,6 +18,13 @@ import OfferList from "@/components/offer-list"
 import PriceChart from "@/components/price-chart"
 import { useWeb3 } from "@/hooks/useWeb3"
 
+async function fetchCompliance(tokenId: number) {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"
+  const res = await fetch(`${API_BASE_URL}/datasets/${tokenId}/compliance`)
+  if (!res.ok) return null
+  return res.json()
+}
+
 const stripHtmlText = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 
 export default function StoryDetail() {
@@ -47,6 +54,7 @@ export default function StoryDetail() {
   const [showOfferModal, setShowOfferModal] = useState(false)
   const [showOffers, setShowOffers] = useState(false)
   const { account, isConnected } = useWeb3()
+  const [compliance, setCompliance] = useState<any | null>(null)
 
   useEffect(() => {
     const loadStory = async () => {
@@ -68,6 +76,12 @@ export default function StoryDetail() {
         }
         
         setStory(storyData)
+
+        // Load compliance (license/release/provenance)
+        try {
+          const comp = await fetchCompliance(tokenId)
+          setCompliance(comp)
+        } catch {}
         
         // Load marketplace listing if exists
         try {
@@ -242,6 +256,12 @@ export default function StoryDetail() {
                 <Eye size={16} />
                 <span>{story.tokenId}</span>
               </div>
+
+              {story.vertical && (
+                <span className="text-xs px-2 py-1 bg-accent/20 text-accent rounded-full">
+                  {String(story.vertical).replace(/_/g, " ")}
+                </span>
+              )}
             </div>
 
             {/* Marketplace Section */}

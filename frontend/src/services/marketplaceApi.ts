@@ -1,4 +1,5 @@
 // Marketplace API service
+import { placeholderStories } from "@/data/placeholderStories"
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"
 
 export interface Listing {
@@ -83,6 +84,11 @@ export async function fetchListings(params?: {
   tribe?: string
   language?: string
   tokenId?: string
+  vertical?: string
+  licenseKey?: string
+  consentScope?: string
+  hasReleases?: boolean
+  hasProvenance?: boolean
 }): Promise<ListingsResponse> {
   try {
     const queryParams = new URLSearchParams()
@@ -94,6 +100,11 @@ export async function fetchListings(params?: {
     if (params?.tribe) queryParams.append("tribe", params.tribe)
     if (params?.language) queryParams.append("language", params.language)
     if (params?.tokenId) queryParams.append("tokenId", params.tokenId)
+    if (params?.vertical) queryParams.append("vertical", params.vertical)
+    if (params?.licenseKey) queryParams.append("licenseKey", params.licenseKey)
+    if (params?.consentScope) queryParams.append("consentScope", params.consentScope)
+    if (typeof params?.hasReleases === "boolean") queryParams.append("hasReleases", params.hasReleases ? "true" : "false")
+    if (typeof params?.hasProvenance === "boolean") queryParams.append("hasProvenance", params.hasProvenance ? "true" : "false")
 
     const url = `${API_BASE_URL}/marketplace/listings${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
     const response = await fetch(url)
@@ -105,13 +116,68 @@ export async function fetchListings(params?: {
     return response.json()
   } catch (error) {
     console.warn("API fetch failed, using placeholder data:", error)
-    // Return empty listings as fallback
+    // Generate rich placeholder listings from placeholder stories
+    const now = Date.now()
+    const generated = placeholderStories.slice(0, 40).map((s, idx) => {
+      const priceMatic = 0.25 + ((idx % 9) + 1) * 0.15
+      const start = new Date(now - (idx + 1) * 24 * 60 * 60 * 1000).toISOString()
+      const end = (idx % 3 === 0)
+        ? new Date(now + (idx + 2) * 24 * 60 * 60 * 1000).toISOString()
+        : undefined
+      return {
+        id: idx + 1,
+        listingId: idx + 1,
+        tokenId: s.tokenId,
+        seller: s.author,
+        priceWei: Math.round(priceMatic * 1e18).toString(),
+        priceMatic,
+        currency: "MATIC",
+        listingType: (idx % 3 === 0 ? "auction" : "fixed") as "fixed" | "auction",
+        status: "active" as const,
+        startTime: start,
+        endTime: end,
+        createdAt: start,
+        story: {
+          title: s.title,
+          description: s.description,
+          tribe: s.tribe,
+          language: s.language,
+          ipfsHash: "",
+          metadata: s.metadata,
+          author: s.author,
+        },
+      }
+    })
+
+    // Apply basic filters client-side for placeholders
+    let filtered = generated
+    if (typeof params?.minPrice === "number") {
+      filtered = filtered.filter(l => l.priceMatic >= params.minPrice!)
+    }
+    if (typeof params?.maxPrice === "number") {
+      filtered = filtered.filter(l => l.priceMatic <= params.maxPrice!)
+    }
+    if (params?.tribe) {
+      filtered = filtered.filter(l => l.story?.tribe === params.tribe)
+    }
+    if (params?.language) {
+      filtered = filtered.filter(l => l.story?.language === params.language)
+    }
+    if (params?.tokenId) {
+      filtered = filtered.filter(l => l.tokenId.toString() === params.tokenId)
+    }
+
+    const page = params?.page || 1
+    const limit = params?.limit || 20
+    const startIdx = (page - 1) * limit
+    const listings = filtered.slice(startIdx, startIdx + limit)
+
     return {
-      listings: [],
+      listings,
       pagination: {
-        page: params?.page || 1,
-        limit: params?.limit || 20,
-        total: 0,
+        page,
+        limit,
+        total: filtered.length,
       },
     }
   }

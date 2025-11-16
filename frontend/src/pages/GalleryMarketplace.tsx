@@ -46,6 +46,11 @@ export default function GalleryMarketplace() {
   const [minPrice, setMinPrice] = useState("")
   const [maxPrice, setMaxPrice] = useState("")
   const [showFilters, setShowFilters] = useState(false)
+  const [vertical, setVertical] = useState("")
+  const [licenseKey, setLicenseKey] = useState("")
+  const [consentScope, setConsentScope] = useState("")
+  const [hasReleases, setHasReleases] = useState<string>("")
+  const [hasProvenance, setHasProvenance] = useState<string>("")
   
   // Data states
   const [stories, setStories] = useState<Story[]>([])
@@ -95,6 +100,11 @@ export default function GalleryMarketplace() {
           status: selectedStatus,
           minPrice: minPrice ? parseFloat(minPrice) : undefined,
           maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+          vertical: vertical || undefined,
+          licenseKey: licenseKey || undefined,
+          consentScope: consentScope || undefined,
+          hasReleases: hasReleases === "" ? undefined : hasReleases === "true",
+          hasProvenance: hasProvenance === "" ? undefined : hasProvenance === "true",
           limit: 1000,
         })
         setListings(response.listings)
@@ -109,7 +119,7 @@ export default function GalleryMarketplace() {
     if (viewMode === "all" || viewMode === "marketplace") {
       loadListings()
     }
-  }, [viewMode, selectedStatus, minPrice, maxPrice])
+  }, [viewMode, selectedStatus, minPrice, maxPrice, vertical, licenseKey, consentScope, hasReleases, hasProvenance])
 
   // Filter and sort stories (Gallery view)
   const filteredAndSortedStories = useMemo(() => {
@@ -391,6 +401,68 @@ export default function GalleryMarketplace() {
                         className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-2 block">Vertical</label>
+                    <select
+                      value={vertical}
+                      onChange={(e) => setVertical(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="">Any</option>
+                      <option value="stereo_video">Robotics: Stereo Video</option>
+                      <option value="xr_mocap">XR: Motion Capture</option>
+                      <option value="medical_imaging">Medical Imaging (non‑PHI)</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground mb-2 block">License Key</label>
+                      <input
+                        type="text"
+                        value={licenseKey}
+                        onChange={(e) => setLicenseKey(e.target.value)}
+                        placeholder="e.g., COMMERCIAL_NEXCLUSIVE"
+                        className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground mb-2 block">Consent Scope</label>
+                      <input
+                        type="text"
+                        value={consentScope}
+                        onChange={(e) => setConsentScope(e.target.value)}
+                        placeholder="e.g., model_release, non_sensitive"
+                        className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground mb-2 block">Releases</label>
+                      <select
+                        value={hasReleases}
+                        onChange={(e) => setHasReleases(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">Any</option>
+                        <option value="true">Has releases</option>
+                        <option value="false">No releases</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-2 block">Provenance</label>
+                    <select
+                      value={hasProvenance}
+                      onChange={(e) => setHasProvenance(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="">Any</option>
+                      <option value="true">Has provenance</option>
+                      <option value="false">No provenance</option>
+                    </select>
                   </div>
                 </>
               )}

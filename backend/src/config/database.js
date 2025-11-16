@@ -10,9 +10,12 @@ export function initDatabase() {
     throw new Error("DATABASE_URL environment variable is required")
   }
 
+  // Supabase requires SSL connections
+  const isSupabase = process.env.DATABASE_URL.includes("supabase") || process.env.USE_SUPABASE === "true"
+  
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL.includes("supabase") ? { rejectUnauthorized: false } : false,
+    ssl: isSupabase ? { rejectUnauthorized: false } : false,
   })
 
   pool.on("error", async (err) => {
@@ -50,9 +53,87 @@ export async function createTables() {
       author VARCHAR(255) NOT NULL,
       tribe VARCHAR(100),
       language VARCHAR(50),
+      vertical VARCHAR(50),
       title VARCHAR(500),
       description TEXT,
       metadata JSONB,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS licenses (
+      id SERIAL PRIMARY KEY,
+      key VARCHAR(100) UNIQUE NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      legal_text_uri VARCHAR(500),
+      machine_terms JSONB,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS story_licenses (
+      id SERIAL PRIMARY KEY,
+      token_id INTEGER UNIQUE NOT NULL REFERENCES stories(token_id) ON DELETE CASCADE,
+      license_id INTEGER NOT NULL REFERENCES licenses(id),
+      attached_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS releases (
+      id SERIAL PRIMARY KEY,
+      token_id INTEGER NOT NULL REFERENCES stories(token_id) ON DELETE CASCADE,
+      model_release_uri VARCHAR(500),
+      location_release_uri VARCHAR(500),
+      consent_scope VARCHAR(100),
+      capture_region VARCHAR(100),
+      capture_date TIMESTAMP,
+      deid_attestation BOOLEAN,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS provenance (
+      id SERIAL PRIMARY KEY,
+      token_id INTEGER UNIQUE NOT NULL REFERENCES stories(token_id) ON DELETE CASCADE,
+      device_fingerprint VARCHAR(255),
+      capture_gps JSONB,
+      capture_time TIMESTAMP,
+      content_hash VARCHAR(255),
+      manifest_uri VARCHAR(500),
+      qc_report_uri VARCHAR(500),
+      version_map JSONB,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS processing_jobs (
+      id SERIAL PRIMARY KEY,
+      job_id VARCHAR(64) UNIQUE NOT NULL,
+      status VARCHAR(20) DEFAULT 'queued',
+      error TEXT,
+      input_cid VARCHAR(255),
+      output_preview_uri VARCHAR(500),
+      qc_report_uri VARCHAR(500),
+      token_id INTEGER,
+      vertical VARCHAR(50),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS purchases (
+      id SERIAL PRIMARY KEY,
+      token_id INTEGER NOT NULL REFERENCES stories(token_id) ON DELETE CASCADE,
+      buyer_address VARCHAR(255) NOT NULL,
+      license_snapshot JSONB,
+      delivery_uris JSONB,
+      transaction_hash VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (token_id, buyer_address, transaction_hash)
+    );
+
+    CREATE TABLE IF NOT EXISTS requests (
+      id SERIAL PRIMARY KEY,
+      requester_address VARCHAR(255) NOT NULL,
+      vertical VARCHAR(50) NOT NULL,
+      specs JSONB NOT NULL,
+      bounty_matic NUMERIC(20, 8),
+      status VARCHAR(20) DEFAULT 'open',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -172,6 +253,13 @@ export async function createTables() {
     "CREATE INDEX IF NOT EXISTS idx_token_id ON stories(token_id)",
     "CREATE INDEX IF NOT EXISTS idx_author ON stories(author)",
     "CREATE INDEX IF NOT EXISTS idx_tribe ON stories(tribe)",
+    "CREATE INDEX IF NOT EXISTS idx_vertical ON stories(vertical)",
+    "CREATE INDEX IF NOT EXISTS idx_story_license_token ON story_licenses(token_id)",
+    "CREATE INDEX IF NOT EXISTS idx_releases_token ON releases(token_id)",
+    "CREATE INDEX IF NOT EXISTS idx_provenance_token ON provenance(token_id)",
+    "CREATE INDEX IF NOT EXISTS idx_processing_status ON processing_jobs(status)",
+    "CREATE INDEX IF NOT EXISTS idx_purchases_buyer ON purchases(buyer_address)",
+    "CREATE INDEX IF NOT EXISTS idx_requests_vertical ON requests(vertical)",
     "CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_address)",
     "CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read)",
     "CREATE INDEX IF NOT EXISTS idx_lazy_mints_hash ON lazy_mints(ipfs_hash)",

@@ -46,6 +46,7 @@ interface StoryFormState {
   tribe: string
   language: string
   expressionType: ExpressionType
+  vertical?: string
 }
 
 interface Chapter {
@@ -145,6 +146,7 @@ export default function StoryUploadForm() {
     tribe: "",
     language: "",
     expressionType: "writer",
+    vertical: "",
   })
   const [chapters, setChapters] = useState<Chapter[]>([createChapter(0)])
   const textAreaRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map())
@@ -540,6 +542,7 @@ export default function StoryUploadForm() {
           { trait_type: "Category", value: formData.category },
           { trait_type: "Tribe", value: formData.tribe },
           { trait_type: "Language", value: formData.language },
+            ...(formData.vertical ? [{ trait_type: "Vertical", value: formData.vertical }] : []),
           { trait_type: "Author", value: formData.author },
           { trait_type: "Expression Type", value: activeExpression?.label ?? formData.expressionType },
           { trait_type: "Chapters", value: normalizedChapters.length.toString() },
@@ -550,6 +553,7 @@ export default function StoryUploadForm() {
         chapters: normalizedChapters,
         content: combinedContent,
         expressionType: formData.expressionType,
+          vertical: formData.vertical,
       }
 
       let metadataCid: string | null = null
@@ -628,6 +632,7 @@ export default function StoryUploadForm() {
           author: formData.author,
           tribe: formData.tribe,
           language: formData.language,
+          vertical: formData.vertical,
           title: formData.title,
           description: formData.description,
           metadata,
@@ -1215,6 +1220,25 @@ export default function StoryUploadForm() {
           placeholder="Select relevant genres"
           helperText="Choose one or multiple genres to help the community discover your work."
           />
+        </div>
+
+        <div>
+          <label htmlFor="vertical" className="block text-sm font-semibold mb-2">
+            Data Vertical (optional)
+          </label>
+          <select
+            id="vertical"
+            name="vertical"
+            value={formData.vertical}
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 rounded-lg border bg-background text-foreground focus:outline-none focus:ring-2 border-border focus:ring-primary"
+          >
+            <option value="">Select a vertical (if this is dataset-like)</option>
+            <option value="stereo_video">Robotics: Stereo Video</option>
+            <option value="xr_mocap">XR: Motion Capture</option>
+            <option value="medical_imaging">Medical Imaging (non‑PHI)</option>
+          </select>
+          <p className="mt-1 text-xs text-muted-foreground">Adds structured metadata and enables marketplace filters.</p>
         </div>
 
         {/* Lazy Minting Option */}

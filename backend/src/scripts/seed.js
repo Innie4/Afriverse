@@ -155,13 +155,31 @@ export async function seedDatabase() {
   try {
     logger.info("Starting database seeding...")
 
+    // Seed licenses
+    logger.info("Seeding licenses...")
+    const licensePresets = [
+      { key: "COMMERCIAL_NONEXCLUSIVE", name: "Commercial, Non-Exclusive", machine_terms: { commercial: true, exclusive: false, redistribution: false, derivatives: true, sensitiveUseBan: true }},
+      { key: "RESEARCH_ONLY", name: "Research Only (Non-Commercial)", machine_terms: { commercial: false, exclusive: false, redistribution: false, derivatives: true, sensitiveUseBan: true }},
+      { key: "EDUCATIONAL", name: "Educational Use", machine_terms: { commercial: false, exclusive: false, redistribution: true, derivatives: true, sensitiveUseBan: true }},
+    ]
+    for (const lp of licensePresets) {
+      try {
+        await query(
+          `INSERT INTO licenses (key, name, machine_terms) VALUES ($1, $2, $3) ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, machine_terms = EXCLUDED.machine_terms`,
+          [lp.key, lp.name, JSON.stringify(lp.machine_terms)]
+        )
+      } catch (e) {
+        logger.warn("License seed failed", e.message)
+      }
+    }
+
     // Seed stories
     logger.info("Seeding stories...")
     for (const story of sampleStories) {
       try {
         await query(
-          `INSERT INTO stories (token_id, ipfs_hash, author, tribe, language, title, description, metadata)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          `INSERT INTO stories (token_id, ipfs_hash, author, tribe, language, vertical, title, description, metadata)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
            ON CONFLICT (token_id) DO NOTHING`,
           [
             story.token_id,
@@ -169,6 +187,7 @@ export async function seedDatabase() {
             story.author,
             story.tribe,
             story.language,
+            "stereo_video",
             story.title,
             story.description,
             JSON.stringify(story.metadata)
@@ -203,6 +222,45 @@ export async function seedDatabase() {
         logger.warn(`Failed to seed listing ${listing.listing_id}:`, error.message)
       }
     }
+
+    // Attach licenses to stories
+    logger.info("Attaching licenses to stories...")
+    await query(
+      `INSERT INTO story_licenses (token_id, license_id)
+       SELECT s.token_id, l.id FROM stories s CROSS JOIN LATERAL (SELECT id FROM licenses WHERE key = 'COMMERCIAL_NONEXCLUSIVE' LIMIT 1) l
+       ON CONFLICT (token_id) DO NOTHING`
+    )
+
+    // Seed releases
+    logger.info("Seeding releases...")
+    await query(
+      `INSERT INTO releases (token_id, consent_scope, capture_region, deid_attestation)
+       SELECT token_id, 'model_release', 'NG', true FROM stories
+       ON CONFLICT DO NOTHING`
+    )
+
+    // Seed provenance
+    logger.info("Seeding provenance...")
+    await query(
+      `INSERT INTO provenance (token_id, device_fingerprint, capture_gps, capture_time, content_hash)
+       SELECT token_id, 'iphone-12-pro', '{"lat":6.5244,"lng":3.3792}'::jsonb, NOW(), ipfs_hash FROM stories
+       ON CONFLICT (token_id) DO NOTHING`
+    )
+
+    // Seed purchases
+    logger.info("Seeding purchases...")
+    await query(
+      `INSERT INTO purchases (token_id, buyer_address, license_snapshot, delivery_uris, transaction_hash)
+       VALUES (1, '0x9999999999999999999999999999999999999999', '{"key":"COMMERCIAL_NONEXCLUSIVE"}', '[{"type":"ipfs","uri":"ipfs://QmSample1"}]', '0xseedtx1')
+       ON CONFLICT DO NOTHING`
+    )
+
+    // Seed requests
+    logger.info("Seeding requests...")
+    await query(
+      `INSERT INTO requests (requester_address, vertical, specs, bounty_matic)
+       VALUES ('0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','stereo_video','{"weather":"rainy","lighting":"night"}', 5.0)`
+    )
 
     // Seed notifications
     logger.info("Seeding notifications...")

@@ -1,7 +1,8 @@
-// Marketplace controller - handles marketplace operations
+// Marketplace controller - handles marketplace operations (SOLID: Single Responsibility)
 import { query } from "../config/database.js"
 import { getCached, setCached } from "../config/cache.js"
 import logger from "../config/logger.js"
+import { asyncHandler, sendSuccess, sendError, sendNotFound, sendBadRequest } from "../utils/responseHandler.js"
 
 // Helper to convert wei to MATIC (18 decimals)
 function weiToMatic(wei) {
@@ -16,22 +17,25 @@ function maticToWei(matic) {
 /**
  * Get all active listings
  */
-export async function getListings(req, res, next) {
-  try {
-    const { status = "active", page = 1, limit = 20, minPrice, maxPrice, tribe, language, tokenId } = req.query
+export const getListings = asyncHandler(async (req, res) => {
+    const { status = "active", page = 1, limit = 20, minPrice, maxPrice, tribe, language, tokenId, vertical, licenseKey, consentScope, hasReleases, hasProvenance } = req.query
 
-    const cacheKey = `listings:${status}:${page}:${limit}:${minPrice || "all"}:${maxPrice || "all"}:${tribe || "all"}:${language || "all"}:${tokenId || "all"}`
+    const cacheKey = `listings:${status}:${page}:${limit}:${minPrice || "all"}:${maxPrice || "all"}:${tribe || "all"}:${language || "all"}:${tokenId || "all"}:${vertical || "all"}:${licenseKey || "all"}:${consentScope || "all"}:${hasReleases || "all"}:${hasProvenance || "all"}`
 
     const cached = await getCached(cacheKey)
     if (cached) {
       logger.debug("Serving listings from cache")
-      return res.json(cached)
+      return sendSuccess(res, cached)
     }
 
     let queryText = `
-      SELECT l.*, s.title, s.description, s.tribe, s.language, s.ipfs_hash, s.metadata
+      SELECT l.*, s.title, s.description, s.tribe, s.language, s.vertical, s.ipfs_hash, s.metadata, lic.key as license_key, r.consent_scope, p.manifest_uri
       FROM listings l
       LEFT JOIN stories s ON l.token_id = s.token_id
+      LEFT JOIN story_licenses sl ON sl.token_id = s.token_id
+      LEFT JOIN licenses lic ON lic.id = sl.license_id
+      LEFT JOIN releases r ON r.token_id = s.token_id
+      LEFT JOIN provenance p ON p.token_id = s.token_id
       WHERE l.status = $1
     `
     const params = [status]
@@ -62,6 +66,33 @@ export async function getListings(req, res, next) {
       params.push(language)
     }
 
+    if (vertical) {
+      queryText += ` AND s.vertical = $${paramIndex++}`
+      params.push(vertical)
+    }
+
+    if (licenseKey) {
+      queryText += ` AND lic.key = $${paramIndex++}`
+      params.push(licenseKey)
+    }
+
+    if (consentScope) {
+      queryText += ` AND r.consent_scope = $${paramIndex++}`
+      params.push(consentScope)
+    }
+
+    if (hasReleases === "true") {
+      queryText += ` AND r.id IS NOT NULL`
+    } else if (hasReleases === "false") {
+      queryText += ` AND r.id IS NULL`
+    }
+
+    if (hasProvenance === "true") {
+      queryText += ` AND p.id IS NOT NULL`
+    } else if (hasProvenance === "false") {
+      queryText += ` AND p.id IS NULL`
+    }
+
     queryText += " ORDER BY l.created_at DESC"
 
     const offset = (parseInt(page) - 1) * parseInt(limit)
@@ -88,9 +119,13 @@ export async function getListings(req, res, next) {
         description: row.description,
         tribe: row.tribe,
         language: row.language,
+        vertical: row.vertical,
         ipfsHash: row.ipfs_hash,
         metadata: row.metadata,
       },
+      licenseKey: row.license_key || null,
+      consentScope: row.consent_scope || null,
+      hasProvenance: !!row.manifest_uri,
     }))
 
     const response = {
@@ -104,25 +139,20 @@ export async function getListings(req, res, next) {
 
     await setCached(cacheKey, response, 300) // Cache for 5 minutes
 
-    res.json(response)
-  } catch (error) {
-    logger.error("Error fetching listings", error)
-    next(error)
-  }
-}
+    sendSuccess(res, response)
+})
 
 /**
  * Get listing by ID
  */
-export async function getListingById(req, res, next) {
-  try {
+export const getListingById = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     const cacheKey = `listing:${id}`
 
     const cached = await getCached(cacheKey)
     if (cached) {
-      return res.json(cached)
+      return sendSuccess(res, cached)
     }
 
     const result = await query(
@@ -136,7 +166,7 @@ export async function getListingById(req, res, next) {
     )
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Listing not found" })
+      return sendNotFound(res, "Listing")
     }
 
     const row = result.rows[0]
@@ -166,22 +196,17 @@ export async function getListingById(req, res, next) {
 
     await setCached(cacheKey, listing, 600)
 
-    res.json(listing)
-  } catch (error) {
-    logger.error("Error fetching listing", error)
-    next(error)
-  }
-}
+    sendSuccess(res, listing)
+})
 
 /**
  * Create a new listing (off-chain record)
  */
-export async function createListing(req, res, next) {
-  try {
+export const createListing = asyncHandler(async (req, res) => {
     const { listingId, tokenId, sellerAddress, priceWei, priceMatic, listingType = "fixed", endTime } = req.body
 
     if (!listingId || !tokenId || !sellerAddress || !priceWei) {
-      return res.status(400).json({ error: "Missing required fields" })
+      return sendBadRequest(res, "Missing required fields: listingId, tokenId, sellerAddress, priceWei")
     }
 
     // Calculate price in MATIC if not provided
@@ -225,23 +250,18 @@ export async function createListing(req, res, next) {
     }
 
     logger.info(`Listing created: listing_id ${listingId}, token_id ${tokenId}`)
-    res.status(201).json({ success: true, listing })
-  } catch (error) {
-    logger.error("Error creating listing", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { listing }, 201)
+})
 
 /**
  * Update listing status
  */
-export async function updateListingStatus(req, res, next) {
-  try {
+export const updateListingStatus = asyncHandler(async (req, res) => {
     const { id } = req.params
     const { status } = req.body
 
     if (!status || !["active", "sold", "cancelled", "ended"].includes(status)) {
-      return res.status(400).json({ error: "Invalid status" })
+      return sendBadRequest(res, "Invalid status. Must be one of: active, sold, cancelled, ended")
     }
 
     const result = await query(
@@ -255,7 +275,7 @@ export async function updateListingStatus(req, res, next) {
     )
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Listing not found" })
+      return sendNotFound(res, "Listing")
     }
 
     // If sold, add to price history
@@ -270,18 +290,13 @@ export async function updateListingStatus(req, res, next) {
       )
     }
 
-    res.json({ success: true, listing: result.rows[0] })
-  } catch (error) {
-    logger.error("Error updating listing status", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { listing: result.rows[0] })
+})
 
 /**
  * Record a sale
  */
-export async function recordSale(req, res, next) {
-  try {
+export const recordSale = asyncHandler(async (req, res) => {
     const {
       tokenId,
       listingId,
@@ -296,7 +311,7 @@ export async function recordSale(req, res, next) {
     } = req.body
 
     if (!tokenId || !sellerAddress || !buyerAddress || !priceWei || !transactionHash) {
-      return res.status(400).json({ error: "Missing required fields" })
+      return sendBadRequest(res, "Missing required fields: tokenId, sellerAddress, buyerAddress, priceWei, transactionHash")
     }
 
     const priceMaticValue = priceMatic || weiToMatic(priceWei)
@@ -343,19 +358,27 @@ export async function recordSale(req, res, next) {
       [parseInt(tokenId), BigInt(priceWei), priceMaticValue, transactionHash]
     )
 
+    // Create purchase entitlement
+    const licenseRow = await query(
+      `SELECT l.* FROM story_licenses sl JOIN licenses l ON sl.license_id = l.id WHERE sl.token_id = $1`,
+      [parseInt(tokenId)]
+    )
+    const delivery = await query(`SELECT ipfs_hash FROM stories WHERE token_id = $1`, [parseInt(tokenId)])
+    const deliveryUris = delivery.rows.length ? [{ type: "ipfs", uri: `ipfs://${delivery.rows[0].ipfs_hash}` }] : []
+    await query(
+      `INSERT INTO purchases (token_id, buyer_address, license_snapshot, delivery_uris, transaction_hash)
+       VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`,
+      [parseInt(tokenId), buyerAddress, licenseRow.rows[0] || null, JSON.stringify(deliveryUris), transactionHash]
+    )
+
     logger.info(`Sale recorded: token_id ${tokenId}, tx ${transactionHash}`)
-    res.status(201).json({ success: true, saleId: result.rows[0].id })
-  } catch (error) {
-    logger.error("Error recording sale", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { saleId: result.rows[0].id }, 201)
+})
 
 /**
  * Get sales history
  */
-export async function getSales(req, res, next) {
-  try {
+export const getSales = asyncHandler(async (req, res) => {
     const { tokenId, seller, buyer, page = 1, limit = 20 } = req.query
 
     let queryText = "SELECT * FROM sales WHERE 1=1"
@@ -400,18 +423,13 @@ export async function getSales(req, res, next) {
       createdAt: row.created_at,
     }))
 
-    res.json({ sales, pagination: { page: parseInt(page), limit: parseInt(limit), total: sales.length } })
-  } catch (error) {
-    logger.error("Error fetching sales", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { sales, pagination: { page: parseInt(page), limit: parseInt(limit), total: sales.length } })
+})
 
 /**
  * Get offers for a token
  */
-export async function getOffers(req, res, next) {
-  try {
+export const getOffers = asyncHandler(async (req, res) => {
     const { tokenId } = req.params
 
     const result = await query(
@@ -435,22 +453,17 @@ export async function getOffers(req, res, next) {
       createdAt: row.created_at,
     }))
 
-    res.json({ offers })
-  } catch (error) {
-    logger.error("Error fetching offers", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { offers })
+})
 
 /**
  * Create an offer
  */
-export async function createOffer(req, res, next) {
-  try {
+export const createOffer = asyncHandler(async (req, res) => {
     const { offerId, tokenId, offererAddress, priceWei, priceMatic, expiresAt } = req.body
 
     if (!offerId || !tokenId || !offererAddress || !priceWei) {
-      return res.status(400).json({ error: "Missing required fields" })
+      return sendBadRequest(res, "Missing required fields: offerId, tokenId, offererAddress, priceWei")
     }
 
     const priceMaticValue = priceMatic || weiToMatic(priceWei)
@@ -470,8 +483,7 @@ export async function createOffer(req, res, next) {
       expiresAt || null,
     ])
 
-    res.status(201).json({
-      success: true,
+    sendSuccess(res, {
       offer: {
         id: result.rows[0].id,
         offerId: parseInt(offerId),
@@ -482,23 +494,18 @@ export async function createOffer(req, res, next) {
         status: "pending",
         expiresAt,
       },
-    })
-  } catch (error) {
-    logger.error("Error creating offer", error)
-    next(error)
-  }
-}
+    }, 201)
+})
 
 /**
  * Update offer status
  */
-export async function updateOfferStatus(req, res, next) {
-  try {
+export const updateOfferStatus = asyncHandler(async (req, res) => {
     const { id } = req.params
     const { status } = req.body
 
     if (!status || !["pending", "accepted", "rejected", "expired"].includes(status)) {
-      return res.status(400).json({ error: "Invalid status" })
+      return sendBadRequest(res, "Invalid status. Must be one of: pending, accepted, rejected, expired")
     }
 
     const result = await query(
@@ -512,7 +519,7 @@ export async function updateOfferStatus(req, res, next) {
     )
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Offer not found" })
+      return sendNotFound(res, "Offer")
     }
 
     // If accepted, record as sale
@@ -528,18 +535,13 @@ export async function updateOfferStatus(req, res, next) {
       )
     }
 
-    res.json({ success: true, offer: result.rows[0] })
-  } catch (error) {
-    logger.error("Error updating offer status", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { offer: result.rows[0] })
+})
 
 /**
  * Get price history for a token
  */
-export async function getPriceHistory(req, res, next) {
-  try {
+export const getPriceHistory = asyncHandler(async (req, res) => {
     const { tokenId } = req.params
 
     const result = await query(
@@ -562,18 +564,13 @@ export async function getPriceHistory(req, res, next) {
       createdAt: row.created_at,
     }))
 
-    res.json({ history })
-  } catch (error) {
-    logger.error("Error fetching price history", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { history })
+})
 
 /**
  * Get user's NFTs (owned, created, listed)
  */
-export async function getUserNFTs(req, res, next) {
-  try {
+export const getUserNFTs = asyncHandler(async (req, res) => {
     const { address } = req.params
     const { type = "all" } = req.query // 'owned', 'created', 'listed', 'all'
 
@@ -599,14 +596,10 @@ export async function getUserNFTs(req, res, next) {
     // Note: 'owned' would require querying the blockchain contract
     // This is a placeholder - implement blockchain query in production
 
-    res.json({
+    sendSuccess(res, {
       owned: owned.length > 0 ? owned : [], // Placeholder
       created,
       listed,
     })
-  } catch (error) {
-    logger.error("Error fetching user NFTs", error)
-    next(error)
-  }
-}
+})
 
