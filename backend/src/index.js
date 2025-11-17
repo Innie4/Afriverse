@@ -106,9 +106,14 @@ async function initializeServices() {
     logger.info("Initializing services...")
 
     // Initialize database
-    initDatabase()
-    await createTables()
-    logger.info("Database initialized")
+    try {
+      initDatabase()
+      await createTables()
+      logger.info("Database initialized")
+    } catch (dbError) {
+      logger.warn("Database initialization failed, will retry on first request:", dbError.message)
+      // Don't fail server startup - database will be initialized on first use
+    }
 
     // Seed database if enabled
     if (process.env.SEED_DATABASE === "true") {

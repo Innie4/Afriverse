@@ -1,16 +1,16 @@
-// Lazy mint controller - handles lazy minting operations
+// Lazy mint controller - handles lazy minting operations (SOLID: Single Responsibility)
 import { query } from "../config/database.js"
 import logger from "../config/logger.js"
+import { asyncHandler, sendSuccess, sendBadRequest, sendNotFound } from "../utils/responseHandler.js"
 
 /**
  * Create a lazy mint
  */
-export async function createLazyMint(req, res, next) {
-  try {
+export const createLazyMint = asyncHandler(async (req, res) => {
     const { ipfsHash, authorAddress, tribe, language, metadata } = req.body
 
     if (!ipfsHash || !authorAddress) {
-      return res.status(400).json({ error: "Missing required fields" })
+      return sendBadRequest(res, "Missing required fields: ipfsHash, authorAddress")
     }
 
     const insertQuery = `
@@ -30,8 +30,7 @@ export async function createLazyMint(req, res, next) {
     ])
 
     logger.info(`Lazy mint created: ${ipfsHash} by ${authorAddress}`)
-    res.status(201).json({
-      success: true,
+    sendSuccess(res, {
       lazyMint: {
         id: result.rows[0].id,
         ipfsHash,
@@ -41,18 +40,13 @@ export async function createLazyMint(req, res, next) {
         metadata,
         minted: false,
       },
-    })
-  } catch (error) {
-    logger.error("Error creating lazy mint", error)
-    next(error)
-  }
-}
+    }, 201)
+})
 
 /**
  * Get lazy mint by IPFS hash
  */
-export async function getLazyMint(req, res, next) {
-  try {
+export const getLazyMint = asyncHandler(async (req, res) => {
     const { ipfsHash } = req.params
 
     const result = await query(
@@ -64,11 +58,11 @@ export async function getLazyMint(req, res, next) {
     )
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Lazy mint not found" })
+      return sendNotFound(res, "Lazy mint")
     }
 
     const lazyMint = result.rows[0]
-    res.json({
+    sendSuccess(res, {
       id: lazyMint.id,
       ipfsHash: lazyMint.ipfs_hash,
       authorAddress: lazyMint.author_address,
@@ -80,22 +74,17 @@ export async function getLazyMint(req, res, next) {
       createdAt: lazyMint.created_at,
       mintedAt: lazyMint.minted_at,
     })
-  } catch (error) {
-    logger.error("Error fetching lazy mint", error)
-    next(error)
-  }
-}
+})
 
 /**
  * Mark lazy mint as minted
  */
-export async function markLazyMintMinted(req, res, next) {
-  try {
+export const markLazyMintMinted = asyncHandler(async (req, res) => {
     const { ipfsHash } = req.params
     const { tokenId } = req.body
 
     if (!tokenId) {
-      return res.status(400).json({ error: "Token ID required" })
+      return sendBadRequest(res, "Token ID required")
     }
 
     const result = await query(
@@ -109,22 +98,17 @@ export async function markLazyMintMinted(req, res, next) {
     )
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Lazy mint not found" })
+      return sendNotFound(res, "Lazy mint")
     }
 
     logger.info(`Lazy mint marked as minted: ${ipfsHash} -> token ${tokenId}`)
-    res.json({ success: true, lazyMint: result.rows[0] })
-  } catch (error) {
-    logger.error("Error marking lazy mint as minted", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { lazyMint: result.rows[0] })
+})
 
 /**
  * Get user's lazy mints
  */
-export async function getUserLazyMints(req, res, next) {
-  try {
+export const getUserLazyMints = asyncHandler(async (req, res) => {
     const { address } = req.params
     const { minted = "all" } = req.query // 'all', 'true', 'false'
 
@@ -157,10 +141,6 @@ export async function getUserLazyMints(req, res, next) {
       mintedAt: row.minted_at,
     }))
 
-    res.json({ lazyMints })
-  } catch (error) {
-    logger.error("Error fetching user lazy mints", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { lazyMints })
+})
 

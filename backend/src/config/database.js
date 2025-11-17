@@ -13,10 +13,16 @@ export function initDatabase() {
   // Supabase requires SSL connections
   const isSupabase = process.env.DATABASE_URL.includes("supabase") || process.env.USE_SUPABASE === "true"
   
-  pool = new Pool({
+  // Configure connection with proper timeouts and SSL
+  const poolConfig = {
     connectionString: process.env.DATABASE_URL,
     ssl: isSupabase ? { rejectUnauthorized: false } : false,
-  })
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000,
+    max: 20,
+  }
+  
+  pool = new Pool(poolConfig)
 
   pool.on("error", async (err) => {
     const logger = (await import("./logger.js")).default

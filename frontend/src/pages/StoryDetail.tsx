@@ -54,7 +54,6 @@ export default function StoryDetail() {
   const [showOfferModal, setShowOfferModal] = useState(false)
   const [showOffers, setShowOffers] = useState(false)
   const { account, isConnected } = useWeb3()
-  const [compliance, setCompliance] = useState<any | null>(null)
 
   useEffect(() => {
     const loadStory = async () => {
@@ -79,8 +78,8 @@ export default function StoryDetail() {
 
         // Load compliance (license/release/provenance)
         try {
-          const comp = await fetchCompliance(tokenId)
-          setCompliance(comp)
+          await fetchCompliance(tokenId)
+          // Compliance data loaded (for future use)
         } catch {}
         
         // Load marketplace listing if exists

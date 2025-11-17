@@ -1,8 +1,9 @@
-// Bundle controller - handles bundle purchase operations
+// Bundle controller - handles bundle purchase operations (SOLID: Single Responsibility)
 import { query } from "../config/database.js"
 import { getCached, setCached } from "../config/cache.js"
 import logger from "../config/logger.js"
 import { createNotification } from "../services/notificationService.js"
+import { asyncHandler, sendSuccess, sendBadRequest, sendNotFound } from "../utils/responseHandler.js"
 
 // Helper to convert wei to MATIC
 function weiToMatic(wei) {
@@ -12,8 +13,7 @@ function weiToMatic(wei) {
 /**
  * Record a bundle purchase
  */
-export async function recordBundle(req, res, next) {
-  try {
+export const recordBundle = asyncHandler(async (req, res) => {
     const {
       bundleId,
       buyerAddress,
@@ -30,7 +30,7 @@ export async function recordBundle(req, res, next) {
     } = req.body
 
     if (!bundleId || !buyerAddress || !listingIds || !tokenIds || !totalPriceWei) {
-      return res.status(400).json({ error: "Missing required fields" })
+      return sendBadRequest(res, "Missing required fields: bundleId, buyerAddress, listingIds, tokenIds, totalPriceWei")
     }
 
     const totalPriceMaticValue = totalPriceMatic || weiToMatic(totalPriceWei)
@@ -94,18 +94,13 @@ export async function recordBundle(req, res, next) {
     }
 
     logger.info(`Bundle purchase recorded: ${bundleId}, buyer: ${buyerAddress}`)
-    res.status(201).json({ success: true, bundleId: result.rows[0].id })
-  } catch (error) {
-    logger.error("Error recording bundle purchase", error)
-    next(error)
-  }
-}
+    sendSuccess(res, { bundleId: result.rows[0].id }, 201)
+})
 
 /**
  * Get bundle by ID
  */
-export async function getBundleById(req, res, next) {
-  try {
+export const getBundleById = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     const result = await query(
@@ -117,11 +112,11 @@ export async function getBundleById(req, res, next) {
     )
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Bundle not found" })
+      return sendNotFound(res, "Bundle")
     }
 
     const bundle = result.rows[0]
-    res.json({
+    sendSuccess(res, {
       id: bundle.id,
       bundleId: bundle.bundle_id,
       buyer: bundle.buyer_address,
@@ -136,17 +131,12 @@ export async function getBundleById(req, res, next) {
       transactionHash: bundle.transaction_hash,
       createdAt: bundle.created_at,
     })
-  } catch (error) {
-    logger.error("Error fetching bundle", error)
-    next(error)
-  }
-}
+})
 
 /**
  * Get user's bundle purchases
  */
-export async function getUserBundles(req, res, next) {
-  try {
+export const getUserBundles = asyncHandler(async (req, res) => {
     const { address } = req.params
     const { page = 1, limit = 20 } = req.query
 
@@ -175,7 +165,7 @@ export async function getUserBundles(req, res, next) {
       createdAt: row.created_at,
     }))
 
-    res.json({
+    sendSuccess(res, {
       bundles,
       pagination: {
         page: parseInt(page),
@@ -183,9 +173,5 @@ export async function getUserBundles(req, res, next) {
         total: bundles.length,
       },
     })
-  } catch (error) {
-    logger.error("Error fetching user bundles", error)
-    next(error)
-  }
-}
+})
 

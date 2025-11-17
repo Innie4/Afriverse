@@ -1,16 +1,16 @@
-// Upload controller - handles IPFS uploads
+// Upload controller - handles IPFS uploads (SOLID: Single Responsibility)
 import { uploadToIPFS, uploadMetadataToIPFS, getIPFSGatewayURL } from "../services/ipfs.js"
 import logger from "../config/logger.js"
 import { query } from "../config/database.js"
+import { asyncHandler, sendSuccess, sendBadRequest } from "../utils/responseHandler.js"
 import crypto from "crypto"
 
 /**
  * Upload file to IPFS
  */
-export async function uploadFile(req, res, next) {
-  try {
+export const uploadFile = asyncHandler(async (req, res) => {
     if (!req.file && !req.body.file) {
-      return res.status(400).json({ error: "No file provided" })
+      return sendBadRequest(res, "No file provided")
     }
 
     let file, filename
@@ -38,53 +38,42 @@ export async function uploadFile(req, res, next) {
       [jobId, cid, vertical]
     )
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       cid,
       ipfsUrl: getIPFSGatewayURL(cid),
       filename,
       jobId,
     })
-  } catch (error) {
-    logger.error("Error uploading file", error)
-    next(error)
-  }
-}
+})
 
 /**
  * Upload metadata to IPFS
  */
-export async function uploadMetadata(req, res, next) {
-  try {
+export const uploadMetadata = asyncHandler(async (req, res) => {
     const { metadata } = req.body
 
     if (!metadata || typeof metadata !== "object") {
-      return res.status(400).json({ error: "Metadata object is required" })
+      return sendBadRequest(res, "Metadata object is required")
     }
 
     const cid = await uploadMetadataToIPFS(metadata)
 
     logger.info(`Metadata uploaded successfully: ${cid}`)
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       cid,
       ipfsUrl: getIPFSGatewayURL(cid),
     })
-  } catch (error) {
-    logger.error("Error uploading metadata", error)
-    next(error)
-  }
-}
+})
 
 /**
  * Health check endpoint
  */
-export async function healthCheck(req, res) {
-  res.json({
+export const healthCheck = asyncHandler(async (req, res) => {
+  sendSuccess(res, {
     status: "ok",
     timestamp: new Date().toISOString(),
     service: "Afriverse Tales Backend",
   })
-}
+})
 

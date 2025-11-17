@@ -1,45 +1,34 @@
+// Delivery controller - handles purchase delivery operations (SOLID: Single Responsibility)
 import { query } from "../config/database.js"
 import { generateSignedUrl, verifySignedParams } from "../services/signedUrls.js"
+import { asyncHandler, sendSuccess, sendBadRequest, sendNotFound } from "../utils/responseHandler.js"
 
-export async function listPurchases(req, res, next) {
-  try {
+export const listPurchases = asyncHandler(async (req, res) => {
     const { address } = req.params
     const result = await query(`SELECT * FROM purchases WHERE buyer_address = $1 ORDER BY created_at DESC`, [address])
-    res.json({ purchases: result.rows })
-  } catch (error) {
-    next(error)
-  }
-}
+    sendSuccess(res, { purchases: result.rows })
+})
 
-export async function getDownloadLink(req, res, next) {
-  try {
+export const getDownloadLink = asyncHandler(async (req, res) => {
     const { address, tokenId } = req.params
     const purchase = await query(`SELECT * FROM purchases WHERE buyer_address = $1 AND token_id = $2 ORDER BY created_at DESC LIMIT 1`, [
       address,
       parseInt(tokenId),
     ])
-    if (purchase.rows.length === 0) return res.status(404).json({ error: "No entitlement found" })
+    if (purchase.rows.length === 0) return sendNotFound(res, "Purchase entitlement")
     // For MVP, assume IPFS gateway path is derived from story ipfs_hash
     const story = await query(`SELECT ipfs_hash FROM stories WHERE token_id = $1`, [parseInt(tokenId)])
-    if (story.rows.length === 0) return res.status(404).json({ error: "Story not found" })
+    if (story.rows.length === 0) return sendNotFound(res, "Story")
     const resourcePath = `/ipfs/${story.rows[0].ipfs_hash}`
     const { url, expiry } = generateSignedUrl(resourcePath)
-    res.json({ url, expiry })
-  } catch (error) {
-    next(error)
-  }
-}
+    sendSuccess(res, { url, expiry })
+})
 
-export async function verifyDownload(req, res, next) {
-  try {
-    const { path } = req.query
-    const { e, sig } = req.query
-    if (!path || !e || !sig) return res.status(400).json({ ok: false })
+export const verifyDownload = asyncHandler(async (req, res) => {
+    const { path, e, sig } = req.query
+    if (!path || !e || !sig) return sendBadRequest(res, "Missing required parameters: path, e, sig")
     const ok = verifySignedParams(path, e, sig)
-    res.json({ ok })
-  } catch (error) {
-    next(error)
-  }
-}
+    sendSuccess(res, { ok })
+})
 
 

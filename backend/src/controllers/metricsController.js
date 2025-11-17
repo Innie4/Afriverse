@@ -1,7 +1,8 @@
+// Metrics controller - handles admin metrics operations (SOLID: Single Responsibility)
 import { query } from "../config/database.js"
+import { asyncHandler, sendSuccess } from "../utils/responseHandler.js"
 
-export async function getAdminMetrics(req, res, next) {
-  try {
+export const getAdminMetrics = asyncHandler(async (req, res) => {
     const [supply, qcPass, devices, regions, demand, searches, quality, economics] = await Promise.all([
       query("SELECT COUNT(*)::int AS total FROM stories"),
       query("SELECT COUNT(*)::int AS with_prov FROM provenance"),
@@ -13,15 +14,12 @@ export async function getAdminMetrics(req, res, next) {
       query("SELECT COALESCE(SUM(price_matic),0) AS gm FROM sales"),
     ])
 
-    res.json({
+    sendSuccess(res, {
       supply: { stories: supply.rows[0].total, withProvenance: qcPass.rows[0].with_prov, devices: devices.rows[0].devices, regions: regions.rows[0].regions },
       demand: { purchases: demand.rows[0].purchases, topSearchGaps: searches.rows[0].top_search_gaps },
       quality: { defects: quality.rows[0].defects },
       economics: { grossMerchandiseMatic: economics.rows[0].gm },
     })
-  } catch (error) {
-    next(error)
-  }
-}
+})
 
 

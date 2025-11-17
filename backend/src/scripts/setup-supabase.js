@@ -14,9 +14,28 @@ export async function setupSupabase() {
     // Import database functions
     const { initDatabase, createTables } = await import("../config/database.js")
     
-    // Initialize connection
-    initDatabase()
-    console.log("✅ Connected to Supabase")
+    // Initialize connection with retry logic
+    let retries = 3
+    let connected = false
+    
+    while (retries > 0 && !connected) {
+      try {
+        initDatabase()
+        // Test connection
+        const { query } = await import("../config/database.js")
+        await query("SELECT 1")
+        connected = true
+        console.log("✅ Connected to Supabase")
+      } catch (connError) {
+        retries--
+        if (retries > 0) {
+          console.log(`⚠️  Connection attempt failed, retrying... (${retries} attempts left)`)
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        } else {
+          throw connError
+        }
+      }
+    }
     
     // Create tables
     console.log("📊 Creating tables...")
@@ -33,18 +52,13 @@ export async function setupSupabase() {
     console.error("\n❌ Supabase setup failed:", error.message)
     
     if (error.code === "ENOTFOUND" || error.code === "ETIMEDOUT") {
-      console.error("\n⚠️  Could not connect to Supabase.")
-      console.error("\nPossible issues:")
-      console.error("1. Project might be paused (free tier pauses after inactivity)")
-      console.error("   → Go to Supabase Dashboard and click 'Restore' if paused")
-      console.error("2. Using direct connection instead of pooler")
-      console.error("   → Use pooler connection string (port 6543) for better reliability")
-      console.error("   → Format: postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres")
-      console.error("3. Network/DNS issue")
-      console.error("   → Check your internet connection")
-      console.error("\nGet your connection string from:")
-      console.error("   Supabase Dashboard → Settings → Database → Connection string → URI")
-      console.error("   → Use 'Transaction' mode (port 6543) for best results")
+      console.error("\n⚠️  Connection issue detected.")
+      console.error("The database connection string may need to be updated.")
+      console.error("However, tables will be created automatically when the server starts.")
+      console.error("\nTo fix connection:")
+      console.error("1. Check Supabase Dashboard - ensure project is active (not paused)")
+      console.error("2. Update DATABASE_URL in .env with pooler connection (port 6543)")
+      console.error("3. Or the connection will work when server starts if project is active")
     } else if (error.code === "28P01") {
       console.error("\n⚠️  Authentication failed.")
       console.error("Please check your Supabase password in DATABASE_URL")
@@ -53,6 +67,8 @@ export async function setupSupabase() {
       console.error("Please set DATABASE_URL with your Supabase connection string")
     }
     
+    // Don't fail completely - tables will be created on server start
+    console.log("\n📝 Note: Database tables will be created automatically when server starts")
     return false
   }
 }
